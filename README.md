@@ -41,7 +41,7 @@ true.
 A = john,
 B = anderson.
 
-?- assert(person(john,anderson)).
+?- retract(person(john,anderson)).
 true.
 
 ?- person(A,B).
@@ -84,17 +84,48 @@ Alician proportions. So, here we GOOOoooo...
 Woo. An object disappears into prolog, and comes back out again. Having gained
 much wisdom. Hurhur. And at least one extra instance variable.
 
+And now, the pièce de résistance - using an object as an input term:
+
+``` ruby
+fact = Upl::Term.functor :person, :james, :madison, (o = Object.new)
+Upl::Runtime.eval Upl::Term.functor :assert, fact
+
+fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
+Upl::Runtime.eval Upl::Term.functor :assert, fact2
+
+# Note that both facts are in the result
+query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
+Array Upl::Runtime.term_vars_query query_term, query_vars
+=>[{:A=>james, :B=>madison, :C=>#<Object:0x0000563f56e35580 @_upl_atom=439429>},
+  {:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
+
+# Unify C with thing2. This needs a nicer api :-\
+query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
+Upl::Extern.PL_unify query_vars.last.args.to_a.last, thing2.to_term
+
+# ... and we get the correct result
+# Note that the first fact is not in the result.
+Array Upl::Runtime.term_vars_query query_term, query_vars
+=> [{:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
+```
+
 ## Disclaimer
 
 This is in-development code. I use it for some things other than just playing with. It might be useful for you too.
 
+ruby has a GC. swipl has a GC. At some point they will disagree. I haven't reached that point yet.
+
 ## Naming
 
-Upl? Wat!? Why?
+```Upl```? Wat!? Why?
 
-Well. ```swipl``` was taken. ```ripl``` was taken. So maybe in keeping with long tradition: rupl. But that leads to ```pry -I. -rrupl``` which is Not Fun. But upl gives you ```pry -I. -rupl``` So it's kinda like ```ubygems```
+Well. ```swipl``` was taken. ```ripl``` was taken. So maybe in keeping with long tradition: ```rupl```.
 
-Also, Upl rhymes with tuple and/or supple. Depending on your pronunciation :-p
+But that leads to ```pry -I. -rrupl``` which is Not Fun.
+
+But ```upl``` gives you ```pry -I. -rupl``` So it's kinda like ```ubygems```.
+
+Also, ```Upl``` rhymes with tuple and/or supple. Depending on your pronunciation :-p
 
 ## Installation
 

@@ -1,0 +1,56 @@
+RSpec.describe Upl do
+  it "has a version number" do
+    expect(Upl::VERSION).not_to be nil
+  end
+
+  describe 'facts' do
+    include Upl
+
+    before :each do
+      # Doesn't work.
+      # tout_le_monde = Upl::Term.functor :person, *3.times.map{Upl::Variable.new.to_term}
+      # Upl::Runtime.eval Upl::Term.functor :retractall, tout_le_monde
+    end
+
+    def query_str; 'person(A,B,C)' end
+
+    it 'retrieves an objective fact' do
+      fact = Upl::Term.functor :person, :john, :anderson, (obj = Object.new)
+      assert = Upl::Term.functor :assert, fact
+      Upl::Runtime.eval assert
+      ry, = Array Upl.query query_str
+      ry[:A].to_sym.should == :john
+      ry[:B].to_sym.should == :anderson
+      ry[:C].should equal(obj)
+
+      Upl::Runtime.eval Upl::Term.functor :retract, fact
+    end
+
+    it 'restricts based on objective value' do
+      fact1 = Upl::Term.functor :person, :james, :madison, (thing1 = Object.new)
+      assert = Upl::Term.functor :assert, fact1
+      Upl::Runtime.eval assert
+
+      fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
+      assert = Upl::Term.functor :assert, fact2
+      Upl::Runtime.eval assert
+
+      # parse the query, then unify C with thing2
+      # this needs a nicer api :-\
+      query_term, query_vars = Upl::Runtime.term_vars query_str
+      Upl::Extern.PL_unify query_vars.last.args.to_a.last, thing2.to_term
+      results = Array Upl::Runtime.term_vars_query query_term, query_vars
+
+      # we have results...
+      results.size.should == 1
+      ry = results.first
+
+      ry[:A].to_sym.should == :thomas
+      ry[:B].to_sym.should == :paine
+      ry[:C].should equal(thing2)
+
+      Upl::Runtime.eval Upl::Term.functor :retract, fact1
+      Upl::Runtime.eval Upl::Term.functor :retract, fact2
+    end
+  end
+end

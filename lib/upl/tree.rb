@@ -47,6 +47,12 @@ module Upl
         rv == 1 or raise "Can't convert to int64. Maybe too large."
         int_ptr.ptr.to_i
 
+      when Extern::PL_FLOAT
+        rv = Extern.PL_get_float term, (double_ptr = Fiddle::Pointer[0].ref)
+        rv == 1 or raise "Can't convert to double. Maybe too large."
+        bytes = double_ptr[0,8]
+        bytes.unpack('D').first
+
       when Extern::PL_STRING
         rv = Extern.PL_get_string term, (str_ptr = Fiddle::Pointer[0].ref), (len_ptr = Fiddle::Pointer[0].ref)
         value_ptr = Fiddle::Pointer.new str_ptr.ptr, len_ptr.ptr.to_i

@@ -101,19 +101,5 @@ module Upl
         end
       end
     end
-
-    protected
-
-    def populate_args count
-      (1..arity).each do |i|
-        rv = Extern::PL_get_arg i, term_t, (subterm = Extern.PL_new_term_ref)
-        if rv == 1
-          yield subterm
-        else
-          puts "#{rv}: can't convert #{i} arg of #{atom}"
-          yield subterm
-        end
-      end
-    end
   end
 end

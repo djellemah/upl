@@ -116,9 +116,11 @@ module Upl
       end
     end
 
+    # set term_t[idx] = val_term_t
+    # idx is zero-based, unlike the prolog calls
     def []=( idx, val_term_t)
-      Extern::PL_get_arg idx+1, term_t, (subterm = Extern.PL_new_term_ref)
-      rv = Extern.PL_unify subterm, val_term_t
+      raise IndexError, "max index is #{arity-1}" if idx >= arity
+      rv = Extern.PL_unify_arg(idx+1, term_t, val_term_t)
       rv == 1 or raise "can't set index #{idx}"
     end
 

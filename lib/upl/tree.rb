@@ -60,6 +60,12 @@ module Upl
       when Extern::PL_LIST_PAIR
         list_to_ary term
 
+      when Extern::PL_DICT
+        Dict.of_term term
+
+      else
+        :NotImplemented
+
       end
     end
 

@@ -6,6 +6,7 @@ require_relative 'upl/term'
 require_relative 'upl/variable'
 require_relative 'upl/atom'
 require_relative 'upl/runtime'
+require_relative 'upl/dict'
 require_relative 'upl/tree'
 require_relative 'upl/inter'
 

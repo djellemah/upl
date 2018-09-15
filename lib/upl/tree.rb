@@ -37,7 +37,7 @@ module Upl
         if atom.to_s =~ /^ruby-(\d+)/
           ObjectSpace._id2ref $1.to_i
         else
-          atom
+          atom.to_sym
         end
 
       when Extern::PL_INTEGER

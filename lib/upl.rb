@@ -9,6 +9,7 @@ require_relative 'upl/runtime'
 require_relative 'upl/dict'
 require_relative 'upl/tree'
 require_relative 'upl/inter'
+require_relative 'upl/term_vector'
 
 module Upl
   def self.query st, &blk

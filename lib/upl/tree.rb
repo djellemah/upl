@@ -40,8 +40,11 @@ module Upl
           atom.to_sym
         end
 
-      when Extern::PL_INTEGER
-        Extern.PL_get_integer term, (int_ptr = Fiddle::Pointer[0].ref)
+      # I think integers > 63 bits can be fetched with PL_get_mpz
+      # Other than PL_INTEGER, most of these seem to be unused?
+      when Extern::PL_INTEGER, Extern::PL_LONG, Extern::PL_INT, Extern::PL_INT64, Extern::PL_SHORT
+        rv = Extern.PL_get_int64 term, (int_ptr = Fiddle::Pointer[0].ref)
+        rv == 1 or raise "Can't convert to int64. Maybe too large."
         int_ptr.ptr.to_i
 
       when Extern::PL_STRING

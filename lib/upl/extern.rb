@@ -205,6 +205,7 @@ module Upl
     extern 'int PL_get_atom_chars(term_t t, char **a)'
     extern 'int PL_get_string(term_t t, char **s, size_t *len)'
     extern 'int PL_get_integer(term_t t, int *i)'
+    extern 'int PL_get_int64(term_t t, int64_t *i)'
     extern 'int PL_get_chars(term_t t, char **s, unsigned int flags)'
     extern 'int PL_get_name_arity(term_t t, atom_t *name, int *arity)'
     extern 'int PL_get_arg(int index, term_t t, term_t a)'

@@ -2,10 +2,11 @@ module Upl
   # Really this is just an empty term.
   class Variable
     def initialize term_t = nil
-      @term_t = term_t || Extern.PL_new_term_ref
+      @term_t = term_t || self.class.to_term
     end
 
     attr_reader :term_t
+    alias to_term_t term_t
 
     def self.copy term_t
       inst = new term_t

@@ -19,7 +19,7 @@ module Upl
 
     attr_reader :term_t
 
-    def to_term; term_t end
+    def to_term_t; term_t end
 
     # Make a copy of all the term information. Useful for passing in to queries, apparently.
     def self.copy term_t
@@ -34,14 +34,14 @@ module Upl
       term_t
     end
 
-    # args are things that can be converted to term_t pointers using to_term method
+    # args are things that can be converted to term_t pointers using to_term_t method
     def self.functor name, *args
       # TODO maybe use a frame or something because this allocates quite a few sub-terms
       functor_t = Extern.PL_new_functor name.to_sym.to_atom, args.size
 
       arg_terms = Extern.PL_new_term_refs args.size
       args.each_with_index do |arg,i|
-        Extern::PL_unify (arg_terms+i), arg.to_term
+        Extern::PL_unify (arg_terms+i), arg.to_term_t
       end
 
       term_t = Extern.PL_new_term_ref
@@ -96,7 +96,7 @@ module Upl
       Extern::PL_pred to_functor, Extern::NULL
     end
 
-    def tree; @tree || (Tree.new self) end
+    def tree; @tree || (Tree.of_term term_t) end
     def to_ruby; tree end
 
     # Assume that term_t still has a value. Which means we have to copy all

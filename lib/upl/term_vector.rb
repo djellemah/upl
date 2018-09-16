@@ -14,7 +14,7 @@ module Upl
       when Fiddle::Pointer
         term_or_ptr
       else
-        term_or_ptr.to_term
+        term_or_ptr.to_term_t
       end
     end
 

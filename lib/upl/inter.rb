@@ -9,7 +9,13 @@ class Object
     end
   end
 
+  # return a Term object from to_term_t
   def to_term
+    Term.new to_term_t
+  end
+
+  # return a term_t pointer
+  def to_term_t
     if frozen?
       # TODO must check instance variable here
       _upl_termize

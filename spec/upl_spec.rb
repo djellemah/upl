@@ -38,7 +38,7 @@ RSpec.describe Upl do
       # parse the query, then unify C with thing2
       # this needs a nicer api :-\
       query_term, query_vars = Upl::Runtime.term_vars query_str
-      Upl::Extern.PL_unify query_vars.last.args.to_a.last, thing2.to_term
+      Upl::Extern.PL_unify query_vars.last.args.to_a.last, thing2.to_term_t
       results = Array Upl::Runtime.term_vars_query query_term, query_vars
 
       # we have results...

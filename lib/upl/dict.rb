@@ -7,24 +7,21 @@ module Upl
 
     # fetch the tag for the dict
     def self.dict_tag( dict_term_t )
-      args = Extern.PL_new_term_refs 2
-
-      # set first arg to dict_term_t
-      # TODO need a term vector for this and other places
-      rv = Extern::PL_put_term args+0, dict_term_t
-      rv == 1 or raise "can't assign dict_term_t"
+      args = TermVector[dict_term_t, nil]
 
       # TODO need a better api here as well, and other places
+      # eg, need to check that args.size == predicate.arity
+      # otherwise segfaults and other weird stuff ensue
       rv = Extern::PL_call_predicate \
         Extern::NULL, # module
         0, # flags, see PL_open_query
-        (Runtime.predicate 'is_dict', 2),
-        args
+        (Runtime.predicate 'is_dict', args.size),
+        args.terms
 
       rv == 1 or raise "can't retrieve dict tag"
 
-      # now retrieve the term's first arg's value
-      Tree.of_term args+1
+      # now retrieve the variable's value
+      args.last.tree
     end
 
     # copy dict_term_t into a ruby structure

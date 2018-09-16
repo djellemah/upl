@@ -19,7 +19,7 @@ module Upl
 
     # bit of a hack to create empty variables for a functor
     def self.to_term
-      new
+      Extern.PL_new_term_ref
     end
 
     def to_s; _string end

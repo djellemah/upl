@@ -53,4 +53,13 @@ RSpec.describe Upl do
       Upl::Runtime.eval Upl::Term.functor :retract, fact2
     end
   end
+
+  describe Upl::Runtime do
+    describe 'squery' do
+      it 'returns values' do
+        ry = Array described_class.squery :current_prolog_flag, 2
+        ry.assoc(:emulated_dialect).should == [:emulated_dialect, :swi]
+      end
+    end
+  end
 end

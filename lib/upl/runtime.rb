@@ -45,23 +45,15 @@ module Upl
     # Use prolog predicate to parse the string into a term with its named variables
     def self.term_vars st
       # atom_to_term('your_pred(A,B,C,D)',Term,Options).
-      terms = Extern.PL_new_term_refs 3
-      atom, term, options = terms+0, terms+1, terms+2
-
-      Extern::PL_put_atom atom, (Extern::PL_new_atom Fiddle::Pointer[st])
-      Extern::PL_put_variable term
-      Extern::PL_put_variable options
-
       # docs say to use read_term_from_atom/3, but it fails with uninstantiated variables for 7.7.18
+      # TODO need to use read_term_from_atom('retry(A,B,C)', Term, [variable_names(VarNames)]).
       rv = Extern::PL_call_predicate \
         Extern::NULL, # module
         0, # flags, see PL_open_query
         (predicate 'atom_to_term', 3),
-        terms
+        (args = TermVector[st.to_sym, nil, nil]).terms
 
-      # first must be Term.new otherwise Term unhooks the term_t pointer
-      # vars *must* be unhooked though ¯\_(ツ)_/¯
-      return (Term.new term), (list_to_ary options do |elt| Term.new elt end)
+      return args[1], (list_to_ary args[2] do |elt| Term.new elt end)
     end
 
     def self.unify( term_a, term_b )
@@ -78,13 +70,10 @@ module Upl
 
       begin
         # input values
-        terms_ptr = Extern.PL_new_term_refs qterm.arity
-         qterm.args.each_with_index do |arg,idx|
-          Extern::PL_unify (terms_ptr+idx), arg
-        end
+        args = TermVector.new qterm.arity do |idx| qterm[idx] end
 
         # module is NULL, flags is 0
-        query_id_p = Extern.PL_open_query Extern::NULL, 0, qterm.to_predicate, terms_ptr
+        query_id_p = Extern.PL_open_query Extern::NULL, 0, qterm.to_predicate, args.terms
         query_id_p != 0 or raise 'no space on environment stack, see SWI-Prolog docs for PL_open_query'
 
         loop do
@@ -135,44 +124,41 @@ module Upl
       pred_p = Extern.PL_predicate Ptr[name.to_s], arity, Extern::NULL
     end
 
-    def self.list_to_ary lst, &elt_converter
+    # lst_term is a Term, or a Fiddle::Pointer to term_t
+    def self.list_to_ary lst_term, &elt_converter
+      lst_term = TermVector.term_t_of lst_term
       rv = []
 
-      while Extern::PL_get_nil(lst) != 1 # not end of list
+      while Extern::PL_get_nil(lst_term) != 1 # not end of list
         res = Extern::PL_get_list \
-          lst,
+          lst_term,
           (head = Extern.PL_new_term_ref),
           (rst = Extern.PL_new_term_ref)
 
         break unless res == 1
 
         rv << (elt_converter.call head)
-        lst = rst
+        lst_term = rst
       end
 
       rv
     end
 
-    # simple query with predicate / arity
+    # Simple query with predicate / arity
+    # Returns an array of arrays.
     def self.squery predicate_str, arity
       return enum_for :squery, predicate_str, arity unless block_given?
-      p_atom = Extern::PL_new_atom Fiddle::Pointer[predicate_str]
-      p_functor = Extern::PL_new_functor p_atom, arity
+
+      p_functor = Extern::PL_new_functor predicate_str.to_sym.to_atom, arity
       p_predicate = Extern::PL_pred p_functor, Extern::NULL
 
-      answer_lst = Extern.PL_new_term_refs arity
-      query_id_p = Extern.PL_open_query Extern::NULL, 0, p_predicate, answer_lst
+      answer_lst = TermVector.new arity
+      query_id_p = Extern.PL_open_query Extern::NULL, 0, p_predicate, answer_lst.terms
 
       loop do
-        res = Extern.PL_next_solution query_id_p
-        break if res == 0
-
-        answrs =
-        arity.times.map do |i|
-          term_to_ruby answer_lst+i
-        end
-
-        yield answrs
+        rv = Extern.PL_next_solution query_id_p
+        break if rv == 0
+        yield answer_lst.each_t.map{|term_t| Tree.of_term term_t}
       end
 
     ensure

@@ -1,6 +1,6 @@
 RSpec.describe Upl do
   it "has a version number" do
-    expect(Upl::VERSION).not_to be nil
+    Upl::VERSION.should_not be_nil
   end
 
   describe 'facts' do

@@ -21,4 +21,12 @@ module Upl
     p = Pathname filename
     Runtime::eval %Q{["#{p.realpath.to_s}"]}
   end
+
+  def self.assert term
+    Runtime.eval Term.functor :assert, term
+  end
+
+  def self.retract term
+    Runtime.eval Term.functor :retract, term
+  end
 end

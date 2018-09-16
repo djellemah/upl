@@ -82,7 +82,7 @@ module Upl
           break if res == 0
 
           hash = qvars.each_with_object Hash.new do |name_var,ha|
-            name_term_t, var_term_t = name_var.args.to_a
+            name_term_t, var_term_t = *name_var
             name = Term.new name_term_t
 
             # term_t will be invalidated by the next call to PL_next_solution,

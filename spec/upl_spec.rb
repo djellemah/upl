@@ -12,13 +12,11 @@ RSpec.describe Upl do
       # Upl::Runtime.eval Upl::Term.functor :retractall, tout_le_monde
     end
 
-    def query_str; 'person(A,B,C)' end
-
     it 'retrieves an objective fact' do
       fact = Upl::Term.functor :person, :john, :anderson, (obj = Object.new)
       Upl.assert fact
 
-      ry, = Array Upl.query query_str
+      ry, = Array Upl.query 'person(A,B,C)'
       ry[:A].to_sym.should == :john
       ry[:B].to_sym.should == :anderson
       ry[:C].should equal(obj)
@@ -35,8 +33,9 @@ RSpec.describe Upl do
 
       # parse the query, then unify C with thing2
       # this needs a nicer api :-\
-      query_term, query_vars = Upl::Runtime.term_vars query_str
-      Upl::Extern.PL_unify query_vars.last.args.to_a.last, thing2.to_term_t
+      query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
+      c_var = query_vars.find{|t| t.first.to_ruby == :C}.last
+      Upl::Extern.PL_unify c_var.term_t, thing2.to_term_t
       results = Array Upl::Runtime.term_vars_query query_term, query_vars
 
       # we have results...

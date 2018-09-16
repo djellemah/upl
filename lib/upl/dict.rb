@@ -21,7 +21,7 @@ module Upl
       rv == 1 or raise "can't retrieve dict tag"
 
       # now retrieve the variable's value
-      args.last.tree
+      args.last.to_ruby
     end
 
     # copy dict_term_t into a ruby structure

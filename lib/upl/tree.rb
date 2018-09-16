@@ -13,7 +13,7 @@ module Upl
       case term
       when Term
         @atom = term.atom
-        @args = term.args.map do |arg|
+        @args = term.map do |arg|
           self.class.term_to_ruby arg
         end
       when Fiddle::Pointer

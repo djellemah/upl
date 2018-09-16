@@ -3,7 +3,7 @@ RSpec.describe Upl::TermVector do
     tv = described_class[nil, nil, nil]
     tv.size.should == 3
     tv.each do |term|
-      term.tree.should be_a(Upl::Variable)
+      term.to_ruby.should be_a(Upl::Variable)
     end
   end
 
@@ -11,7 +11,7 @@ RSpec.describe Upl::TermVector do
     tv = described_class.new 4
     tv.size.should == 4
     tv.each do |term|
-      term.tree.should be_a(Upl::Variable)
+      term.to_ruby.should be_a(Upl::Variable)
     end
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Upl::TermVector do
     tv.size.should == 2
     tv.each do |term|
       term.term_t.type_string.should == :PL_ATOM
-      term.tree.should be_a(Symbol)
+      term.to_ruby.should be_a(Symbol)
     end
   end
 
@@ -29,7 +29,7 @@ RSpec.describe Upl::TermVector do
     tv = described_class.new(3){|idx| ary[idx]}
     tv.each do |term|
       term.term_t.type_string.should == :PL_ATOM
-      term.tree.should be_a(Symbol)
+      term.to_ruby.should be_a(Symbol)
     end
   end
 
@@ -37,8 +37,8 @@ RSpec.describe Upl::TermVector do
     tv = described_class.new 3
     tv[1] = :atomic_failure
 
-    tv.first.tree.should be_a(Upl::Variable)
+    tv.first.to_ruby.should be_a(Upl::Variable)
     tv[1].term_t.type_string.should == :PL_ATOM
-    tv.last.tree.should be_a(Upl::Variable)
+    tv.last.to_ruby.should be_a(Upl::Variable)
   end
 end

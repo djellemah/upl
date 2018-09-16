@@ -18,8 +18,7 @@ module Upl
     end
 
     attr_reader :term_t
-
-    def to_term_t; term_t end
+    alias to_term_t term_t
 
     # Make a copy of all the term information. Useful for passing in to queries, apparently.
     def self.copy term_t
@@ -40,8 +39,8 @@ module Upl
       functor_t = Extern.PL_new_functor name.to_sym.to_atom, args.size
 
       arg_terms = Extern.PL_new_term_refs args.size
-      args.each_with_index do |arg,i|
-        Extern::PL_unify (arg_terms+i), arg.to_term_t
+      args.each_with_index do |arg,idx|
+        Extern::PL_unify (arg_terms+idx), arg.to_term_t
       end
 
       term_t = Extern.PL_new_term_ref
@@ -54,9 +53,10 @@ module Upl
     def populate
       int_ptr = Runtime::Ptr[0].ref
       atom_ptr = Runtime::Ptr[0].ref
+
       rv = Extern::PL_get_name_arity term_t, atom_ptr, int_ptr
       # This happens when the term_t is not a PL_TERM (ie a compound)
-      raise "can't populate term" unless rv == 1
+      rv == 1 or raise "can't populate term"
 
       @arity = int_ptr.ptr.to_i
       @atom = Atom.new atom_ptr
@@ -71,8 +71,6 @@ module Upl
     def <=> rhs
       [@atom, @arity] <=> [rhs.atom, rhs.arity]
     end
-
-    # attr_reader :atom, :arity
 
     def atom
       @atom or begin
@@ -97,24 +95,23 @@ module Upl
     end
 
     def tree; @tree || (Tree.of_term term_t) end
-    def to_ruby; tree end
+    alias to_ruby tree
 
-    # Assume that term_t still has a value. Which means we have to copy all
-    # values before the underlying term_t is changed.
     # TODO leaning hard towards each with Enumerable
-    def args
+    def each
       return enum_for :args unless block_given?
 
-      (1..arity).each do |i|
-        rv = Extern::PL_get_arg i, term_t, (subterm = Extern.PL_new_term_ref)
-        if rv == 1
-          yield subterm
-        else
-          puts "#{rv}: can't convert #{i} arg of #{atom}"
-          yield subterm
-        end
+      (1..arity).each do |idx|
+        rv = Extern::PL_get_arg idx, term_t, (subterm = Extern.PL_new_term_ref)
+        rv == 1 or raise "#{rv}: can't convert #{i} arg of #{atom}"
+        yield subterm
       end
     end
+
+    include Enumerable
+
+    def first; self[0] end
+    def last; self[arity-1] end
 
     def [](idx)
       # remember args for terms are 1-based
@@ -127,7 +124,7 @@ module Upl
     # idx is zero-based, unlike the prolog calls
     def []=( idx, val_term_t)
       raise IndexError, "max index is #{arity-1}" if idx >= arity
-      rv = Extern.PL_unify_arg(idx+1, term_t, val_term_t)
+      rv = Extern.PL_unify_arg idx+1, term_t, val_term_t
       rv == 1 or raise "can't set index #{idx}"
     end
 

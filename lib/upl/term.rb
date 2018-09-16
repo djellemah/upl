@@ -116,6 +116,13 @@ module Upl
       end
     end
 
+    def [](idx)
+      # remember args for terms are 1-based
+      rv = Extern::PL_get_arg idx+1, term_t, (arg = Extern.PL_new_term_ref)
+      rv == 1 or raise "can't access term at #{idx}"
+      Term.new arg
+    end
+
     # set term_t[idx] = val_term_t
     # idx is zero-based, unlike the prolog calls
     def []=( idx, val_term_t)

@@ -33,10 +33,9 @@ RSpec.describe Upl do
 
       # parse the query, then unify C with thing2
       # this needs a nicer api :-\
-      query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
-      c_var = query_vars.find{|t| t.first.to_ruby == :C}.last
-      Upl::Extern.PL_unify c_var.term_t, thing2.to_term_t
-      results = Array Upl::Runtime.term_vars_query query_term, query_vars
+      query_term, query_hash = Upl::Runtime.term_vars 'person(A,B,C)'
+      Upl::Extern.PL_unify query_hash[:C].term_t, thing2.to_term_t
+      results = Array Upl::Runtime.term_vars_query query_term, query_hash
 
       # we have results...
       results.size.should == 1

@@ -67,7 +67,7 @@ module Upl
         Tree.new term_t
 
       when Extern::PL_LIST_PAIR
-        list_to_ary term_t
+        Inter.each_of_list(term_t).to_a
 
       when Extern::PL_DICT
         Dict.of_term term_t
@@ -76,24 +76,6 @@ module Upl
         :NotImplemented
 
       end
-    end
-
-    def self.list_to_ary lst
-      rv = []
-
-      while Extern::PL_get_nil(lst) != 1 # not end of list
-        res = Extern::PL_get_list \
-          lst,
-          (head = Extern.PL_new_term_ref),
-          (rst = Extern.PL_new_term_ref)
-
-        break unless res == 1
-
-        rv << (term_to_ruby head)
-        lst = rst
-      end
-
-      rv
     end
 
     def arity; args.size end

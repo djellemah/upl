@@ -60,18 +60,23 @@ module Upl
       Extern.PL_predicate Fiddle::Pointer[name.to_s], arity, NULL
     end
 
-    # Use prolog predicate to parse the string into a term with its named variables
+    # Use prolog predicate to parse the string into a term, with its named variables as a hash of Name => _variable
+    # TODO maybe use read_term_from_chars, or at least don't force the term to be an atom
+    # TODO need to use read_term_from_atom('retry(A,B,C)', Term, [variable_names(VarNames)]).
     def self.term_vars st
-      # atom_to_term('your_pred(A,B,C,D)',Term,Options).
-      # docs say to use read_term_from_atom/3, but it fails with uninstantiated variables for 7.7.18
-      # TODO need to use read_term_from_atom('retry(A,B,C)', Term, [variable_names(VarNames)]).
       rv = Extern::PL_call_predicate \
         Extern::NULL, # module
         0, # flags, see PL_open_query
         (predicate 'atom_to_term', 3),
         (args = TermVector[st.to_sym, nil, nil]).terms
 
-      return args[1], (list_to_ary args[2] do |elt| Term.new elt end)
+      vars_hash = Inter.each_of_list(args[2]).map do |term_t|
+        # each of these is =(Atom,variable), and we want Atom => variable
+        t = Term.new term_t
+        [t.first.atom.to_sym, t.last]
+      end.to_h
+
+      return args[1], vars_hash
     end
 
     def self.unify( term_a, term_b )
@@ -80,14 +85,14 @@ module Upl
     end
 
     # do a query for the given term and vars, as parsed by term_vars
-    def self.term_vars_query qterm, qvars
+    def self.term_vars_query qterm, qvars_hash
       raise "not a term" unless Term === qterm
-      return enum_for __method__,  qterm, qvars unless block_given?
+      return enum_for __method__,  qterm, qvars_hash unless block_given?
 
       fid_t = Extern.PL_open_foreign_frame
 
       begin
-        # input values
+        # populate input values from qterm
         args = TermVector.new qterm.arity do |idx| qterm[idx] end
 
         # module is NULL, flags is 0
@@ -99,13 +104,10 @@ module Upl
           res = Extern.PL_next_solution query_id_p
           break if res == 0
 
-          hash = qvars.each_with_object Hash.new do |name_var,ha|
-            name_term_t, var_term_t = *name_var
-            name = Term.new name_term_t
-
+          hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
             # term_t will be invalidated by the next call to PL_next_solution,
             # so we need to construct a ruby tree of the value term
-            val = ha[name.atom.to_sym] = Tree.of_term var_term_t
+            val = ha[name_sym] = var.to_ruby
             # binding.pry if val.to_sym == :query_debug_settings rescue false
           end
 
@@ -123,26 +125,6 @@ module Upl
 
     def self.predicate name, arity
       pred_p = Extern.PL_predicate Ptr[name.to_s], arity, Extern::NULL
-    end
-
-    # lst_term is a Term, or a Fiddle::Pointer to term_t
-    def self.list_to_ary lst_term, &elt_converter
-      lst_term = Inter.term_t_of lst_term
-      rv = []
-
-      while Extern::PL_get_nil(lst_term) != 1 # not end of list
-        res = Extern::PL_get_list \
-          lst_term,
-          (head = Extern.PL_new_term_ref),
-          (rst = Extern.PL_new_term_ref)
-
-        break unless res == 1
-
-        rv << (elt_converter.call head)
-        lst_term = rst
-      end
-
-      rv
     end
 
     # Simple query with predicate / arity

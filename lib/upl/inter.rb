@@ -12,6 +12,25 @@ module Upl
         term_or_ptr.to_term_t
       end
     end
+
+    # lst_term is a Term, or a Fiddle::Pointer to term_t
+    # yield term_t items of the lst_term
+    def self.each_of_list lst_term, &blk
+      return enum_for __method__, lst_term unless block_given?
+      lst_term = Inter.term_t_of lst_term
+
+      while Extern::PL_get_nil(lst_term) != 1 # not end of list
+        res = Extern::PL_get_list \
+          lst_term,
+          (head_t = Extern.PL_new_term_ref),
+          (rst_t = Extern.PL_new_term_ref)
+
+        break unless res == 1
+
+        yield head_t
+        lst_term = rst_t
+      end
+    end
   end
 end
 
@@ -27,7 +46,7 @@ class Object
 
   # return a Term object from to_term_t
   def to_term
-    Term.new to_term_t
+    Upl::Term.new to_term_t
   end
 
   # return a term_t pointer

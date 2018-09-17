@@ -14,7 +14,7 @@ RSpec.describe Upl do
 
     it 'retrieves an objective fact' do
       fact = Upl::Term.functor :person, :john, :anderson, (obj = Object.new)
-      Upl.assert fact
+      Upl.assertz fact
 
       ry, = Array Upl.query 'person(A,B,C)'
       ry[:A].to_sym.should == :john
@@ -26,10 +26,10 @@ RSpec.describe Upl do
 
     it 'restricts based on objective value' do
       fact1 = Upl::Term.functor :person, :james, :madison, (thing1 = Object.new)
-      Upl.assert fact1
+      Upl.assertz fact1
 
       fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
-      Upl.assert fact2
+      Upl.assertz fact2
 
       # parse the query, then unify C with thing2
       # this needs a nicer api :-\

@@ -34,7 +34,7 @@ Also we want to be able to construct prolog-queryable facts from ruby objects.
 In prolog:
 
 ``` prolog
-?- assert(person(john,anderson)).
+?- assertz(person(john,anderson)).
 true.
 
 ?- person(A,B).
@@ -53,11 +53,11 @@ And in Upl:
 ``` ruby
 [1] pry(Upl):1> fact = Term.functor :person, :john, :anderson
 => person/2(john,anderson)
-[2] pry(Upl):1> Runtime.eval Term.functor :assert, fact
+[2] pry(Upl):1> Runtime.assertz fact
 => true
 [3] pry(Upl):1> Array query 'person(A,B)'
 => [{:A=>john, :B=>anderson}]
-[4] pry(Upl):1> Runtime.eval Term.functor :retract, fact
+[4] pry(Upl):1> Runtime.retract, fact
 => true
 [5] pry(Upl):1> Array query 'person(A,B)'
 => []
@@ -71,7 +71,7 @@ Alician proportions. So, here we GOOOoooo...
 ``` ruby
 [1] pry(Upl):1> fact = Term.functor :person, :john, :anderson, (o = Object.new)
 => person/3(john,anderson,#<Object:0x0000563346a08e38 @_upl_atom=439429>)
-[2] pry(Upl):1> Runtime.eval Term.functor :assert, fact
+[2] pry(Upl):1> Runtime.assertz fact
 => true
 [3] pry(Upl):1> ha, = Array query 'person(A,B,C)'
 => [{:A=>john,
@@ -88,10 +88,10 @@ And now, the pièce de résistance - using an object as an input term:
 
 ``` ruby
 fact = Upl::Term.functor :person, :james, :madison, (o = Object.new)
-Upl::Runtime.eval Upl::Term.functor :assert, fact
+Upl::Runtime.assertz fact
 
 fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
-Upl::Runtime.eval Upl::Term.functor :assert, fact2
+Upl::Runtime.assertz fact2
 
 # Note that both facts are in the result
 query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'

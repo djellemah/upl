@@ -22,10 +22,15 @@ module Upl
     Runtime::call %Q{["#{p.realpath.to_s}"]}
   end
 
-  def self.assert term
-    Runtime.eval Term.functor :assert, term
+  def self.asserta term
+    Runtime.call Term.functor :asserta, term
   end
 
+  def self.assertz term
+    Runtime.call Term.functor :assertz, term
+  end
+
+  # behaves as if run under once, cos of the way call works
   def self.retract term
     Runtime.call Term.functor :retract, term
   end

@@ -9,7 +9,7 @@ RSpec.describe Upl do
     before :each do
       # Doesn't work.
       # tout_le_monde = Upl::Term.functor :person, *3.times.map{Upl::Variable.new.to_term}
-      # Upl::Runtime.eval Upl::Term.functor :retractall, tout_le_monde
+      # Upl::Runtime.call Upl::Term.functor :retractall, tout_le_monde
     end
 
     it 'retrieves an objective fact' do

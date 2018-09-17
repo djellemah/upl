@@ -235,7 +235,7 @@ module Upl
     ####################
     # looks like parsing of terms
     # only >= 7.6.0
-    # get version, eval current_prolog_flag(version_data,swi(M,I,P,E)). Major, mInor, Patch, Extra[]
+    # get version, call current_prolog_flag(version_data,swi(M,I,P,E)). Major, mInor, Patch, Extra[]
     # PL_EXPORT(int)  PL_put_term_from_chars(term_t t, int flags, size_t len, const char *s);
     # extern 'int PL_put_term_from_chars(term_t t, int flags, size_t len, const char *s)'
 

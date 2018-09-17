@@ -19,7 +19,7 @@ module Upl
 
   def self.consult filename
     p = Pathname filename
-    Runtime::eval %Q{["#{p.realpath.to_s}"]}
+    Runtime::call %Q{["#{p.realpath.to_s}"]}
   end
 
   def self.assert term
@@ -27,6 +27,6 @@ module Upl
   end
 
   def self.retract term
-    Runtime.eval Term.functor :retract, term
+    Runtime.call Term.functor :retract, term
   end
 end

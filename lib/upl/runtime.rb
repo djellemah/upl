@@ -17,6 +17,21 @@ module Upl
   module Runtime
     Ptr = Fiddle::Pointer
 
+    def self.call st_or_term
+      term =
+      case st_or_term
+      when String
+        Term.new st_or_term
+      when Term
+        st_or_term
+      else
+        raise "dunno bout #{st_or_term}"
+      end
+
+      rv = Extern.PL_call term.term_t, Extern::NULL
+      rv == 1 # don't raise
+    end
+
     def self.init
       # set up no output so we don't get swipl command line interfering in ruby
       # TODO exception handling should not kick off a prolog terminal
@@ -101,23 +116,6 @@ module Upl
     ensure
       # this also gets called after enum_for, so test for fid_t
       fid_t and Extern.PL_close_foreign_frame fid_t
-    end
-
-    def self.eval st_or_term
-      p_term =
-      case st_or_term
-      when String
-        rv = Extern.PL_chars_to_term Fiddle::Pointer[st_or_term], (p_term = Extern.PL_new_term_ref)
-        raise "failure parsing term #{st_or_term}" unless rv == 1
-        p_term
-      when Term
-        st_or_term.term_t
-      else
-        raise "dunno bout #{st_or_term}"
-      end
-
-      rv = Extern.PL_call p_term, Extern::NULL
-      rv == 1 or raise "failure executing term #{st}"
     end
 
     def self.predicate name, arity

@@ -27,13 +27,13 @@ module Upl
       term_to_ruby term_t
     end
 
-    def self.term_to_ruby term
-      case term.term_type
+    def self.term_to_ruby term_t
+      case term_t.term_type
       when Extern::PL_VARIABLE
-        Variable.copy term
+        Variable.copy term_t
 
       when Extern::PL_ATOM
-        atom = Atom.of_term term
+        atom = Atom.of_term term_t
         if atom.to_s =~ /^ruby-(\d+)/
           ObjectSpace._id2ref $1.to_i
         else
@@ -43,18 +43,18 @@ module Upl
       # I think integers > 63 bits can be fetched with PL_get_mpz
       # Other than PL_INTEGER, most of these seem to be unused?
       when Extern::PL_INTEGER, Extern::PL_LONG, Extern::PL_INT, Extern::PL_INT64, Extern::PL_SHORT
-        rv = Extern.PL_get_int64 term, (int_ptr = Fiddle::Pointer[0].ref)
+        rv = Extern.PL_get_int64 term_t, (int_ptr = Fiddle::Pointer[0].ref)
         rv == 1 or raise "Can't convert to int64. Maybe too large."
         int_ptr.ptr.to_i
 
       when Extern::PL_FLOAT
-        rv = Extern.PL_get_float term, (double_ptr = Fiddle::Pointer[0].ref)
+        rv = Extern.PL_get_float term_t, (double_ptr = Fiddle::Pointer[0].ref)
         rv == 1 or raise "Can't convert to double. Maybe too large."
         bytes = double_ptr[0,8]
         bytes.unpack('D').first
 
       when Extern::PL_STRING
-        rv = Extern.PL_get_string term, (str_ptr = Fiddle::Pointer[0].ref), (len_ptr = Fiddle::Pointer[0].ref)
+        rv = Extern.PL_get_string term_t, (str_ptr = Fiddle::Pointer[0].ref), (len_ptr = Fiddle::Pointer[0].ref)
         value_ptr = Fiddle::Pointer.new str_ptr.ptr, len_ptr.ptr.to_i
         value_ptr.to_s
 
@@ -64,13 +64,13 @@ module Upl
         nil
 
       when Extern::PL_TERM
-        Tree.new term
+        Tree.new term_t
 
       when Extern::PL_LIST_PAIR
-        list_to_ary term
+        list_to_ary term_t
 
       when Extern::PL_DICT
-        Dict.of_term term
+        Dict.of_term term_t
 
       else
         :NotImplemented

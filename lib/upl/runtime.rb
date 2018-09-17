@@ -163,5 +163,23 @@ module Upl
       # NOTE this also gets called after enum_for
       query_id_p&.to_i and Extern.PL_close_query query_id_p
     end
+
+    def self.query term
+      raise "not a Term" unless Term === term
+      return enum_for :query_term, term unless block_given?
+
+      answer_lst = TermVector.new term.arity do |idx| term[idx] end
+      query_id_p = Extern.PL_open_query Extern::NULL, 0, term.to_predicate, answer_lst.terms
+
+      loop do
+        rv = Extern.PL_next_solution query_id_p
+        break if rv == 0
+        yield answer_lst.each_t.map{|term_t| Tree.of_term term_t}
+      end
+
+    ensure
+      # NOTE this also gets called after enum_for
+      query_id_p&.to_i and Extern.PL_close_query query_id_p
+    end
   end
 end

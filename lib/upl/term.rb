@@ -7,11 +7,14 @@ module Upl
     def initialize term_or_string
       case term_or_string
       when String
-        raise "can't do strings yet"
-        # PL_chars_to_term term_or_string
+        @term_t = Extern.PL_new_term_ref
+        rv = Extern.PL_chars_to_term Fiddle::Pointer[term_or_string], @term_t
+        rv == 1 or raise "failure parsing term #{term_or_string}"
+
       when Fiddle::Pointer
         # assume this is a pointer to a term. Unsafe, but there's no choice really
         @term_t = term_or_string
+
       else
         raise "can't handle #{term_or_string}"
       end
@@ -19,12 +22,6 @@ module Upl
 
     attr_reader :term_t
     alias to_term_t term_t
-
-    # Make a copy of all the term information. Useful for passing in to queries, apparently.
-    def self.copy term_t
-      copy_term_t = Extern.PL_copy_term_ref term_t
-      new copy_term_t
-    end
 
     def self.of_atom atom
       term_t = Extern.PL_new_term_ref

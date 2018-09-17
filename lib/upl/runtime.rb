@@ -124,7 +124,7 @@ module Upl
 
     # lst_term is a Term, or a Fiddle::Pointer to term_t
     def self.list_to_ary lst_term, &elt_converter
-      lst_term = TermVector.term_t_of lst_term
+      lst_term = Inter.term_t_of lst_term
       rv = []
 
       while Extern::PL_get_nil(lst_term) != 1 # not end of list

@@ -6,18 +6,6 @@ module Upl
   # to the underlying term_t pointers, use terms + idx, or the term_t method of
   # the Term objects.
   class TermVector
-    # try Term, then Fiddle::Pointer, then to_term
-    def self.term_t_of term_or_ptr
-      case term_or_ptr
-      when Term
-        term_or_ptr.term_t
-      when Fiddle::Pointer
-        term_or_ptr
-      else
-        term_or_ptr.to_term_t
-      end
-    end
-
     # args must all be convertible to term_t Fiddle::Pointers, via term_t_of.
     #
     # nil values are defaulted to Variable.new, but beware passing in the wrong
@@ -37,7 +25,7 @@ module Upl
       if block_given?
         @size.times do |idx|
           termable = (yield idx) || Variable.new
-          term_t = self.class.term_t_of termable
+          term_t = Inter.term_t_of termable
           # TODO not sure if Extern::PL_put_term should be available as a possibility here?
           rv = Extern::PL_unify @terms+idx, term_t
           rv == 1 or raise "can't set index #{idx} of term_vector to #{termable}"
@@ -69,7 +57,7 @@ module Upl
 
     def []=(idx, value)
       raise IndexError unless idx < @size
-      Extern::PL_put_term @terms + idx, (self.class.term_t_of value)
+      Extern::PL_put_term @terms + idx, (Inter.term_t_of value)
     end
 
     def to_a

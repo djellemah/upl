@@ -1,4 +1,20 @@
-# TODO not used
+module Upl
+  module Inter
+    # Try Term, then Fiddle::Pointer, then to_term_t.
+    # Return a term_t pointer
+    def self.term_t_of term_or_ptr
+      case term_or_ptr
+      when Term
+        term_or_ptr.term_t
+      when Fiddle::Pointer
+        term_or_ptr
+      else
+        term_or_ptr.to_term_t
+      end
+    end
+  end
+end
+
 class Object
   def to_atom
     if frozen?
@@ -48,7 +64,4 @@ class Symbol
   def to_atom
     Upl::Extern.PL_new_atom to_s
   end
-end
-
-module Inter
 end

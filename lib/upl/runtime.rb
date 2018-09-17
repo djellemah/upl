@@ -36,7 +36,7 @@ module Upl
       # set up no output so we don't get swipl command line interfering in ruby
       # TODO exception handling should not kick off a prolog terminal
       # TODO see gem-swipl for more useful stuff here
-      args = %w[upl -q --tty=false --nosignals]
+      args = %w[upl --tty=false --signals=false --debug=false --quiet=true]
 
       # convert args to char **
       ptr_size = Extern.sizeof 'char*'
@@ -48,6 +48,9 @@ module Upl
       # call init
       rv = Extern.PL_initialise args.size, arg_ptrs
       rv == 1 or raise 'PL_initialise failed'
+
+      # we really don't want the prolog console showing up in ruby.
+      call 'set_prolog_flag(debug_on_error,false)'
     end
 
     # once_only. Should probably be a singleton or something.

@@ -13,12 +13,6 @@ Also, do prolog-style queries on objects :-DD
 
 ### Queries
 
-To read rules from a prolog file:
-``` ruby
-[1] pry(main)> Upl.consult '/home/yours/funky_data.pl'
-=> true
-```
-
 Query a built-in predicate, with a full expression:
 ``` ruby
 [1] pry(main)> enum = Upl.query 'current_prolog_flag(K,V), member(K,[home,executable,shared_object_extension])'
@@ -27,6 +21,12 @@ Query a built-in predicate, with a full expression:
 => [{:K=>home, :V=>/usr/lib64/swipl-7.7.18},
  {:K=>executable, :V=>/usr/local/rvm/rubies/ruby-2.6.0-preview2/bin/ruby},
  {:K=>shared_object_extension, :V=>so}]
+```
+
+To read rules from a prolog file:
+``` ruby
+[1] pry(main)> Upl.consult '/home/yours/funky_data.pl'
+=> true
 ```
 
 ### Facts
@@ -51,15 +51,15 @@ false.
 And in Upl:
 
 ``` ruby
-[1] pry(Upl):1> fact = Term.functor :person, :john, :anderson
+[2] pry(main)> fact = Upl::Term.functor :person, :john, :anderson
 => person/2(john,anderson)
-[2] pry(Upl):1> Runtime.assertz fact
+[3] pry(main)> Upl.assertz fact
 => true
-[3] pry(Upl):1> Array query 'person(A,B)'
+[4] pry(main)> Array Upl.query 'person(A,B)'
 => [{:A=>john, :B=>anderson}]
-[4] pry(Upl):1> Runtime.retract, fact
+[5] pry(main)> Upl.retract fact
 => true
-[5] pry(Upl):1> Array query 'person(A,B)'
+[6] pry(main)> Array Upl.query 'person(A,B)'
 => []
 ```
 
@@ -69,15 +69,15 @@ Also, with objects other than symbols. Obviously, this is a rabbit-hole of
 Alician proportions. So, here we GOOOoooo...
 
 ``` ruby
-[1] pry(Upl):1> fact = Term.functor :person, :john, :anderson, (o = Object.new)
+[2] pry(main)> fact = Upl::Term.functor :person, :john, :anderson, (o = Object.new)
 => person/3(john,anderson,#<Object:0x0000563346a08e38 @_upl_atom=439429>)
-[2] pry(Upl):1> Runtime.assertz fact
+[3] pry(main)> Upl.assertz fact
 => true
-[3] pry(Upl):1> ha, = Array query 'person(A,B,C)'
+[4] pry(main)> ha, = Array Upl.query 'person(A,B,C)'
 => [{:A=>john,
   :B=>anderson,
   :C=>#<Object:0x0000563346a08e38 @_upl_atom=439429>}]
-[4] pry(Upl):1> ha[:C].equal? o
+[5] pry(main)> ha[:C].equal? o
 => true
 ```
 
@@ -88,24 +88,24 @@ And now, the pièce de résistance - using an object as an input term:
 
 ``` ruby
 fact = Upl::Term.functor :person, :james, :madison, (o = Object.new)
-Upl::Runtime.assertz fact
+Upl.assertz fact
 
 fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
-Upl::Runtime.assertz fact2
+Upl.assertz fact2
 
 # Note that both facts are in the result
-query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
-Array Upl::Runtime.term_vars_query query_term, query_vars
+query_term, query_hash = Upl::Runtime.term_vars 'person(A,B,C)'
+Array Upl::Runtime.term_vars_query query_term, query_hash
 =>[{:A=>james, :B=>madison, :C=>#<Object:0x0000563f56e35580 @_upl_atom=439429>},
   {:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
 
 # Unify C with thing2. This needs a nicer api :-\
-query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
-Upl::Extern.PL_unify query_vars.last.args.to_a.last, thing2.to_term
+query_term, query_hash = Upl::Runtime.term_vars 'person(A,B,C)'
+Upl::Extern.PL_unify query_hash[:C].term_t, thing2.to_term_t
 
 # ... and we get the correct result
 # Note that the first fact is not in the result.
-Array Upl::Runtime.term_vars_query query_term, query_vars
+Array Upl::Runtime.term_vars_query query_term, query_hash
 => [{:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
 ```
 

@@ -70,12 +70,16 @@ protected
   end
 
   def _upl_atomize
-    # see also PL_agc_hook for hooking into the swipl GC
-    ObjectSpace.define_finalizer self do |this_obj|
-      # TODO PL_unregister_atom? Finalizer?
-      Upl::Extern.PL_unregister_atom this_obj.instance_variable_get :@_upl_atom
-    end
-    Upl::Extern.PL_new_atom "ruby-#{object_id.to_s}"
+    # TODO see also PL_agc_hook for hooking into the swipl GC
+    atom_t = Upl::Extern.PL_new_atom "ruby-#{object_id.to_s}"
+    ObjectSpace.define_finalizer self, &self.class._upl_finalizer_blk(atom_t)
+    atom_t
+  end
+
+  # Have to put this in a separate method, otherwise the finalizer block's
+  # binding holds onto the obj it's trying to finalize.
+  def self._upl_finalizer_blk atom_t
+    proc do |objid| Upl::Extern.PL_unregister_atom atom_t end
   end
 end
 

@@ -67,7 +67,7 @@ module Upl
         Tree.new term_t
 
       when Extern::PL_LIST_PAIR
-        Inter.each_of_list(term_t).to_a
+        Inter.each_of_list(term_t).map{|term_t| Term.new(term_t).to_ruby}
 
       when Extern::PL_DICT
         Dict.of_term term_t

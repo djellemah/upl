@@ -17,7 +17,7 @@ Query a built-in predicate, with a full expression:
 ``` ruby
 [1] pry(main)> enum = Upl.query 'current_prolog_flag(K,V), member(K,[home,executable,shared_object_extension])'
 => #<Enumerator: ...>
-[12] pry(main) enum.to_a
+[2] pry(main) enum.to_a
 => [{:K=>home, :V=>/usr/lib64/swipl-7.7.18},
  {:K=>executable, :V=>/usr/local/rvm/rubies/ruby-2.6.0-preview2/bin/ruby},
  {:K=>shared_object_extension, :V=>so}]
@@ -51,15 +51,15 @@ false.
 And in Upl:
 
 ``` ruby
-[2] pry(main)> fact = Upl::Term.functor :person, :john, :anderson
+[1] pry(main)> fact = Upl::Term.functor :person, :john, :anderson
 => person/2(john,anderson)
-[3] pry(main)> Upl.assertz fact
+[2] pry(main)> Upl.assertz fact
 => true
-[4] pry(main)> Array Upl.query 'person(A,B)'
+[3] pry(main)> Array Upl.query 'person(A,B)'
 => [{:A=>john, :B=>anderson}]
-[5] pry(main)> Upl.retract fact
+[4] pry(main)> Upl.retract fact
 => true
-[6] pry(main)> Array Upl.query 'person(A,B)'
+[5] pry(main)> Array Upl.query 'person(A,B)'
 => []
 ```
 
@@ -69,15 +69,15 @@ Also, with objects other than symbols. Obviously, this is a rabbit-hole of
 Alician proportions. So, here we GOOOoooo...
 
 ``` ruby
-[2] pry(main)> fact = Upl::Term.functor :person, :john, :anderson, (o = Object.new)
+[1] pry(main)> fact = Upl::Term.functor :person, :john, :anderson, (o = Object.new)
 => person/3(john,anderson,#<Object:0x0000563346a08e38 @_upl_atom=439429>)
-[3] pry(main)> Upl.assertz fact
+[2] pry(main)> Upl.assertz fact
 => true
-[4] pry(main)> ha, = Array Upl.query 'person(A,B,C)'
+[3] pry(main)> ha, = Array Upl.query 'person(A,B,C)'
 => [{:A=>john,
   :B=>anderson,
   :C=>#<Object:0x0000563346a08e38 @_upl_atom=439429>}]
-[5] pry(main)> ha[:C].equal? o
+[4] pry(main)> ha[:C].equal? o
 => true
 ```
 

@@ -31,6 +31,46 @@ module Upl
         lst_term = rst_t
       end
     end
+
+    # keep track of object_id atoms that were assigned in prolog, and prolog now
+    # wants to garbage collect them.
+    class Agc
+      def initialize
+        @id_objects = {}
+      end
+
+      def self.instance
+        @instance ||= new
+      end
+
+      def register obj
+        @id_objects[obj.object_id] = obj
+      end
+
+      def deregister obj
+        @id_objects.delete obj.object_id
+      end
+    end
+
+    module_function def attach_atom_hook
+      @atom_hook = atom_hook = Fiddle::Closure::BlockCaller.new Fiddle::TYPE_INT, [Fiddle::TYPE_VOIDP] do |atom_t|
+        atom = Upl::Atom.new atom_t
+        p atom_t: atom_t.to_i, atom: atom
+        if atom.to_obj_id
+          obj = atom.to_ruby
+          p obj: obj, dereg: (Agc.instance.deregister obj)
+        end
+
+        #  FALSE here will prevent garbage collection
+        Upl::Extern::TRUE
+      end
+
+      # NOTENOTE this must NOT be garbage-collected, otherwise the callback to it will fail.
+      @atom_hook_fn = Fiddle::Function.new atom_hook, atom_hook.args, atom_hook.ctype
+
+      # returns old fn ptr
+      Upl::Extern.PL_agc_hook @atom_hook_fn
+    end
   end
 end
 

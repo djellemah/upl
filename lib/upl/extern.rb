@@ -257,5 +257,8 @@ module Upl
     extern 'int PL_wchars_to_term(const pl_wchar_t *chars, term_t term)'
 
     extern 'void PL_unregister_atom(atom_t a)'
+
+    # signature is actually PL_agc_hook_t, not void*
+    extern 'void* PL_agc_hook(void*)'
   end
 end

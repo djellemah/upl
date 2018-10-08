@@ -9,7 +9,7 @@ class Fiddle::Pointer
 
   def type_string
     type_int = term_type
-    ::Upl::Extern.constants.find{|c| (::Upl::Extern.const_get c) == type_int}
+    ::Upl::Extern.constants.find{|c| (::Upl::Extern.const_get c) == type_int} || type_int
   end
 end
 

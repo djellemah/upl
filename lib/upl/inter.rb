@@ -111,7 +111,7 @@ protected
 
   def _upl_atomize
     # TODO see also PL_agc_hook for hooking into the swipl GC
-    atom_t = Upl::Extern.PL_new_atom "ruby-#{object_id.to_s}"
+    atom_t = Upl::Atom.t_of_ruby self
     ObjectSpace.define_finalizer self, &self.class._upl_finalizer_blk(atom_t)
     atom_t
   end

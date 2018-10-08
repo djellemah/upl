@@ -27,18 +27,15 @@ module Upl
       term_to_ruby term_t
     end
 
+    def to_ruby; self end
+
     def self.term_to_ruby term_t
       case term_t.term_type
       when Extern::PL_VARIABLE
         Variable.copy term_t
 
       when Extern::PL_ATOM
-        atom = Atom.of_term term_t
-        if atom.to_s =~ /^ruby-(\d+)/
-          ObjectSpace._id2ref $1.to_i
-        else
-          atom.to_sym
-        end
+        Atom.of_term(term_t).to_ruby
 
       # I think integers > 63 bits can be fetched with PL_get_mpz
       # Other than PL_INTEGER, most of these seem to be unused?
@@ -81,7 +78,7 @@ module Upl
     def arity; args.size end
 
     def pretty_print(pp)
-      unless atom == :','
+      unless atom.to_sym == :','
         pp.text atom.to_s
         if arity > 0
           pp.text ?/

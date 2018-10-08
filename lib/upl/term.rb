@@ -56,7 +56,7 @@ module Upl
       rv == 1 or raise "can't populate term"
 
       @arity = int_ptr.ptr.to_i
-      @atom = Atom.new atom_ptr
+      @atom = Atom.new atom_ptr.ptr
 
       self
     end
@@ -84,7 +84,7 @@ module Upl
     end
 
     def to_functor
-      Extern::PL_new_functor atom.atom_ptr, arity
+      Extern::PL_new_functor atom.atom_t, arity
     end
 
     def to_predicate

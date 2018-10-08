@@ -128,3 +128,19 @@ class Symbol
     Upl::Extern.PL_new_atom to_s
   end
 end
+
+class Integer
+  def to_term_t
+    rv = Upl::Extern.PL_put_int64 (term_t = Upl::Extern.PL_new_term_ref), self
+    rv == 1 or raise "can't convert #{self} to term. Maybe too big."
+    term_t
+  end
+end
+
+class String
+  def to_term_t
+    rv = Upl::Extern.PL_put_string_nchars (term_t = Upl::Extern.PL_new_term_ref), length, Fiddle::Pointer[self]
+    rv == 1 or raise "can't convert #{self} to term"
+    term_t
+  end
+end

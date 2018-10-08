@@ -211,6 +211,10 @@ module Upl
     extern 'int PL_put_variable(term_t t)'
     extern 'int PL_put_functor(term_t t, functor_t functor)'
     extern 'int PL_put_term(term_t t1, term_t t2)' # Make t1 point to the same term as t2.
+    extern 'int PL_put_integer(term_t t, long i)'
+    extern 'int PL_put_int64(term_t t, int64_t i)'
+
+    extern 'int PL_put_string_nchars(term_t t, size_t len, const char *chars)'
 
     extern 'int PL_cons_functor_v(term_t h, functor_t fd, term_t a0)'
 

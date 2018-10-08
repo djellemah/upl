@@ -53,7 +53,7 @@ module Upl
       when Extern::PL_STRING
         rv = Extern.PL_get_string term_t, (str_ptr = Fiddle::Pointer[0].ref), (len_ptr = Fiddle::Pointer[0].ref)
         value_ptr = Fiddle::Pointer.new str_ptr.ptr, len_ptr.ptr.to_i
-        value_ptr.to_s
+        value_ptr.to_s[0,len_ptr.ptr.to_i]
 
       when Extern::PL_NIL
         # TODO maybe this should be [] - see what happens when term_vars has no vars
@@ -70,7 +70,7 @@ module Upl
         Dict.of_term term_t
 
       else
-        :NotImplemented
+        :"#{term_t.type_string} NotImplemented"
 
       end
     end

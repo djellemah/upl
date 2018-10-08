@@ -8,6 +8,9 @@ module Upl
     attr_reader :term_t
     alias to_term_t term_t
 
+    # create a ruby represetation of the term_t
+    def to_ruby; Tree.of_term term_t end
+
     def self.copy term_t
       inst = new term_t
 

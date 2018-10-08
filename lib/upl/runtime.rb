@@ -75,13 +75,13 @@ module Upl
         (predicate 'atom_to_term', 3),
         (args = TermVector[st.to_sym, nil, nil]).terms
 
-      vars_hash = Inter.each_of_list(args[2]).map do |term_t|
+      vars = Inter.each_of_list(args[2]).each_with_object Variables.new do |term_t, vars|
         # each of these is =(Atom,variable), and we want Atom => variable
         t = Term.new term_t
-        [t.first.atom.to_sym, t.last]
-      end.to_h
+        vars.store t.first.atom.to_sym, t.last
+      end
 
-      return args[1], vars_hash
+      return args[1], vars
     end
 
     def self.unify( term_a, term_b )
@@ -90,6 +90,7 @@ module Upl
     end
 
     # do a query for the given term and vars, as parsed by term_vars
+    # qvars_hash is a has of :VariableName => Term(PL_VARIABLE)
     def self.term_vars_query qterm, qvars_hash
       raise "not a term" unless Term === qterm
       return enum_for __method__,  qterm, qvars_hash unless block_given?
@@ -110,10 +111,9 @@ module Upl
           break if res == 0
 
           hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
-            # term_t will be invalidated by the next call to PL_next_solution,
-            # so we need to construct a ruby tree of the value term
-            val = ha[name_sym] = var.to_ruby
-            # binding.pry if val.to_sym == :query_debug_settings rescue false
+            # var will be invalidated by the next call to PL_next_solution,
+            # so we need to construct a ruby tree of the value term.
+            ha[name_sym] = var.to_ruby
           end
 
           yield hash

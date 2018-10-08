@@ -94,20 +94,28 @@ fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
 Upl.assertz fact2
 
 # Note that both facts are in the result
-query_term, query_hash = Upl::Runtime.term_vars 'person(A,B,C)'
-Array Upl::Runtime.term_vars_query query_term, query_hash
+query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
+Array Upl::Runtime.term_vars_query query_term, query_vars
 =>[{:A=>james, :B=>madison, :C=>#<Object:0x0000563f56e35580 @_upl_atom=439429>},
   {:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
 
-# Unify C with thing2. This needs a nicer api :-\
-query_term, query_hash = Upl::Runtime.term_vars 'person(A,B,C)'
-Upl::Extern.PL_unify query_hash[:C].term_t, thing2.to_term_t
+# Unify C with thing2
+query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
+query_vars.C = thing2
 
 # ... and we get the correct result
 # Note that the first fact is not in the result.
-Array Upl::Runtime.term_vars_query query_term, query_hash
+Array Upl::Runtime.term_vars_query query_term, query_vars
 => [{:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
 ```
+
+### Ruby Predicates
+
+You can define predicates in ruby. So you can (theoretically) define a query in prolog that searches a ruby object graph.
+
+``` ruby
+```
+
 
 ## Disclaimer
 

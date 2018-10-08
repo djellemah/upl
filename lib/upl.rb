@@ -10,6 +10,7 @@ require_relative 'upl/dict'
 require_relative 'upl/tree'
 require_relative 'upl/inter'
 require_relative 'upl/term_vector'
+require_relative 'upl/foreign'
 
 module Upl
   module_function def query string_or_term, &blk

@@ -54,6 +54,9 @@ module Upl
     # terms
     extern 'predicate_t PL_predicate(const char *name, int arity, const char *module)'
 
+    TRUE =  (1)
+    FALSE = (0)
+
     ##############
     # querying and getting results
 
@@ -117,6 +120,17 @@ module Upl
     PL_CYCLIC_TERM =           (42)
     PL_NOT_A_LIST =            (43)
     PL_DICT =                  (44)
+
+    # Foreign predicate flags
+    PL_FA_NOTRACE =           (0x01)  # foreign cannot be traced
+    # PL_FA_TRANSPARENT =       (0x02)  # foreign is module transparent. Deprecated.
+    PL_FA_NONDETERMINISTIC =  (0x04)  # foreign is non-deterministic
+    PL_FA_VARARGS =           (0x08)  # call using t0, ac, ctx
+    PL_FA_CREF =              (0x10)  # Internal: has clause-reference
+    PL_FA_ISO =               (0x20)  # Internal: ISO core predicate
+    PL_FA_META =              (0x40)  # Additional meta-argument spec
+
+    extern 'int PL_register_foreign_in_module(char *mod, char *name, int arity, foreign_t (*f)(), int flags, ...)'
 
     module Convert
       REP_UTF8  = 0x1000

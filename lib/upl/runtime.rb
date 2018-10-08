@@ -35,6 +35,9 @@ module Upl
     def self.ruby_free_fn
       @ruby_free_fn ||= Fiddle::Function.new Fiddle::RUBY_FREE, [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
     end
+
+    def self.swipl_free_fn
+      @swipl_free_fn ||= Fiddle::Function.new Extern['PL_free'], [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
     end
 
     def self.init

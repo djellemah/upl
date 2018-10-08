@@ -31,9 +31,10 @@ module Upl
       @_string ||= begin
         Extern::PL_get_chars \
           term_t,
-          (str_ref = Runtime::Ptr[''].ref),
+          (str_ref = Runtime::Ptr[0].ref),
           Extern::Convert::CVT_VARIABLE | Extern::Convert::REP_UTF8 | Extern::Convert::BUF_MALLOC # | Extern::CVT_ALL
 
+        str_ref.ptr.free = Runtime.swipl_free_fn
         str_ref.ptr.to_s
       end
     end

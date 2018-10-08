@@ -12,7 +12,7 @@ require_relative 'upl/inter'
 require_relative 'upl/term_vector'
 
 module Upl
-  def self.query string_or_term, &blk
+  module_function def query string_or_term, &blk
     case string_or_term
     when Term
       Runtime.query string_or_term
@@ -24,21 +24,21 @@ module Upl
     end
   end
 
-  def self.consult filename
+  module_function def consult filename
     p = Pathname filename
     Runtime::call %Q{["#{p.realpath.to_s}"]}
   end
 
-  def self.asserta term
+  module_function def asserta term
     Runtime.call Term.functor :asserta, term
   end
 
-  def self.assertz term
+  module_function def assertz term
     Runtime.call Term.functor :assertz, term
   end
 
   # behaves as if run under once, cos of the way call works
-  def self.retract term
+  module_function def retract term
     Runtime.call Term.functor :retract, term
   end
 
@@ -57,7 +57,7 @@ module Upl
   #
   #   Upl.query Term :current_prolog_flag, Variable.new, Variable.new
   #
-  def self.Term name, *args
+  module_function def Term name, *args
     Term.functor name, *args
   end
 end

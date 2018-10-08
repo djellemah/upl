@@ -156,7 +156,7 @@ module Upl
 
     def self.query term
       raise "not a Term" unless Term === term
-      return enum_for :query_term, term unless block_given?
+      return enum_for :query, term unless block_given?
 
       answer_lst = TermVector.new term.arity do |idx| term[idx] end
       query_id_p = Extern.PL_open_query Extern::NULL, 0, term.to_predicate, answer_lst.terms

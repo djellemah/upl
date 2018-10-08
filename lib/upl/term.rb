@@ -94,7 +94,6 @@ module Upl
     def tree; @tree || (Tree.of_term term_t) end
     alias to_ruby tree
 
-    # TODO leaning hard towards each with Enumerable
     def each
       return enum_for :args unless block_given?
 

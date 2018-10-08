@@ -32,6 +32,11 @@ module Upl
       rv == 1 # don't raise
     end
 
+    def self.ruby_free_fn
+      @ruby_free_fn ||= Fiddle::Function.new Fiddle::RUBY_FREE, [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
+    end
+    end
+
     def self.init
       # set up no output so we don't get swipl command line interfering in ruby
       # TODO exception handling should not kick off a prolog terminal
@@ -40,7 +45,7 @@ module Upl
 
       # convert args to char **
       ptr_size = Extern.sizeof 'char*'
-      arg_ptrs = Ptr.malloc(ptr_size * args.size)
+      arg_ptrs = Ptr.malloc ptr_size * args.size, ruby_free_fn
       args.each_with_index do |rg,i|
         (arg_ptrs + i*ptr_size)[0,ptr_size] = Ptr[rg].ref
       end

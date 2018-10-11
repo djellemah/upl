@@ -111,11 +111,13 @@ Array Upl::Runtime.term_vars_query query_term, query_vars
 
 ### Ruby Predicates
 
-You can define predicates in ruby. So you can (theoretically) define a query in prolog that searches a ruby object graph.
-
+You can define predicates in ruby.
 ``` ruby
+
+
 ```
 
+So you can (theoretically) define a query in prolog that searches a ruby object graph.
 
 ## Disclaimer
 

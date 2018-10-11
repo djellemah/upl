@@ -14,15 +14,19 @@ require_relative 'upl/term_vector'
 require_relative 'upl/foreign'
 
 module Upl
-  module_function def query string_or_term, &blk
-    case string_or_term
-    when Term
-      Runtime.query string_or_term
-    when String
-      term, vars = Runtime.term_vars string_or_term
-      Runtime.term_vars_query term, vars, &blk
+  module_function def query string_or_term, vars = nil, &blk
+    if string_or_term.is_a?(Term) && vars
+      Runtime.term_vars_query string_or_term, vars
     else
-      raise "dunno about #{string_or_term.inspect}"
+      case string_or_term
+      when Term
+        Runtime.query string_or_term
+      when String
+        term, vars = Runtime.term_vars string_or_term
+        Runtime.term_vars_query term, vars, &blk
+      else
+        raise "dunno about #{string_or_term.inspect}"
+      end
     end
   end
 

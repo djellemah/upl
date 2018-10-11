@@ -1,11 +1,12 @@
 module Upl
   # Really this is just an empty term.
   class Variable
-    def initialize term_t = nil
+    def initialize term_t = nil, name: nil
       @term_t = term_t || self.class.to_term
+      @name = name
     end
 
-    attr_reader :term_t
+    attr_reader :term_t, :name
     alias to_term_t term_t
 
     # create a ruby represetation of the term_t
@@ -23,6 +24,11 @@ module Upl
     # bit of a hack to create empty variables for a functor
     def self.to_term
       Extern.PL_new_term_ref
+    end
+
+    def self.[]( *names )
+      vars = names.map{|name| new name: name}
+      if vars.size == 1 then vars.first else vars end
     end
 
     def to_s; _string end
@@ -59,6 +65,10 @@ module Upl
       if attributed?
         attribute.pretty_print pp
       else
+        if name
+          pp.text name
+          pp.text '='
+        end
         pp.text to_s
       end
     end

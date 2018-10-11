@@ -1,5 +1,6 @@
 module Upl
-  # storage from variables, where setting one just calls unify on the underlying terms
+  # Storage from variables, where setting one just calls unify on the underlying terms.
+  # Cos it's hard to hang unify on a single variable.
   class Variables < Hash
     def initialize *names
       super

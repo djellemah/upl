@@ -43,7 +43,7 @@ module Upl
     def self.init
       # set up no output so we don't get swipl command line interfering in ruby
       # TODO exception handling should not kick off a prolog terminal
-      # TODO see gem-swipl for more useful stuff here
+      # TODO from gem-swipl args = [ @swipl_lib, "-tty", "-q", "-t", "true", "-g", "true", "--nodebug", "--nosignals" ]
       args = %w[upl --tty=false --signals=false --debug=false --quiet=true]
 
       # convert args to char **
@@ -78,10 +78,10 @@ module Upl
         (predicate 'atom_to_term', 3),
         (args = TermVector[st.to_sym, nil, nil]).terms
 
-      vars = Inter.each_of_list(args[2]).each_with_object Variables.new do |term_t, vars|
+      vars = Inter.each_of_list(args[2]).each_with_object Hash.new do |term_t, vars|
         # each of these is =(Atom,variable), and we want Atom => variable
         t = Term.new term_t
-        vars.store t.first.atom.to_sym, t.last
+        vars[t.first.atom.to_sym] = t.last
       end
 
       return args[1], vars

@@ -1,3 +1,6 @@
+require_relative 'extern'
+require_relative 'foreign'
+
 module Upl
   module Inter
     # Try Term, then Fiddle::Pointer, then to_term_t.
@@ -12,6 +15,19 @@ module Upl
         term_or_ptr.to_term_t
       end
     end
+
+    # call any method on any object, from prolog
+    def self.register_mcall_predicate
+      Upl::Foreign.register_semidet :mcall do |obj_term_t,meth_term_t,v_term_t|
+        obj = Upl::Tree.of_term obj_term_t
+        meth = Upl::Tree.of_term meth_term_t
+        v = obj.send meth
+
+        Upl::Extern::PL_unify v_term_t, v.to_term_t
+      end
+    end
+
+    register_mcall_predicate
 
     # lst_term is a Term, or a Fiddle::Pointer to term_t
     # yield term_t items of the lst_term
@@ -71,6 +87,17 @@ module Upl
       # returns old fn ptr
       Upl::Extern.PL_agc_hook @atom_hook_fn
     end
+
+    def register_mcall_predicate
+      Upl::Foreign.register_semidet :mcall do |obj_term_t,meth_term_t,v_term_t|
+        obj = Upl::Tree.of_term obj_term_t
+        meth = Upl::Tree.of_term meth_term_t
+        v = obj.send meth
+
+        Upl::Extern::PL_unify v_term_t, v.to_term_t
+      end
+    end
+
   end
 end
 

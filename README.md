@@ -87,17 +87,19 @@ much wisdom. Hurhur. And at least one extra instance variable.
 And now, the pièce de résistance - using an object as an input term:
 
 ``` ruby
-fact = Upl::Term.functor :person, :james, :madison, (o = Object.new)
+fact =  Upl::Term.functor :person, :james, :madison, (o = Object.new)
 Upl.assertz fact
 
 fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
 Upl.assertz fact2
 
-# Note that both facts are in the result
+# Note that both facts are in the result and the values for C are different
 query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
 Array Upl::Runtime.term_vars_query query_term, query_vars
-=>[{:A=>james, :B=>madison, :C=>#<Object:0x0000563f56e35580 @_upl_atom=439429>},
-  {:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
+=>[
+ {:A=>james,  :B=>madison, :C=>#<Object:0x0000563f56e35580 @_upl_atom=439429>},
+ {:A=>thomas, :B=>paine,   :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}
+]
 
 # Unify C with thing2
 query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'

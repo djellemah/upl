@@ -1,0 +1,3 @@
+== 0.0.3
+* rectify README errors
+* specs to handle variable unification from variables from top-level queries.

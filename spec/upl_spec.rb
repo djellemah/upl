@@ -32,10 +32,11 @@ RSpec.describe Upl do
       Upl.assertz fact2
 
       # parse the query, then unify C with thing2
-      # this needs a nicer api :-\
-      query_term, query_hash = Upl::Runtime.term_vars 'person(A,B,C)'
-      Upl::Extern.PL_unify query_hash[:C].term_t, thing2.to_term_t
-      results = Array Upl::Runtime.term_vars_query query_term, query_hash
+      # TODO this needs a nicer api :-\
+      # TODO maybe use one object instead of two, and that one object has a .execute method as well as named variable setters?
+      query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
+      query_vars.C = thing2
+      results = Array Upl.query query_term, query_vars
 
       # we have results...
       results.size.should == 1
@@ -55,6 +56,15 @@ RSpec.describe Upl do
       it 'returns values' do
         ry = Array described_class.squery :current_prolog_flag, 2
         ry.assoc(:emulated_dialect).should == [:emulated_dialect, :swi]
+      end
+    end
+
+    describe 'variables' do
+      it 'creates and unifies query variables' do
+        query_term, query_vars = Upl::Runtime.term_vars 'current_prolog_flag(K,V)'
+        query_vars.K = :emulated_dialect
+        results = Upl.query(query_term, query_vars).first
+        results.should == {:K=>:emulated_dialect, :V=>:swi}
       end
     end
   end

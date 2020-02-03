@@ -72,6 +72,18 @@ module Upl
       PL_Q_DETERMINISTIC =   0x0100  # call was deterministic
     end
 
+
+    module ExtStatus
+      # PL_Q_EXT_STATUS return codes
+      # yes, there are some duplicates here from TRUE/FALSE
+      # but that's how it is in the header file
+      EXCEPTION = -1   # Query raised exception
+      FALSE =      0   # Query failed
+      TRUE =       1   # Query succeeded with choicepoint
+      LAST =       2   # Query succeeded without CP
+    end
+
+
     extern 'fid_t PL_open_foreign_frame(void)'
     extern 'void PL_rewind_foreign_frame(fid_t cid)'
     extern 'void PL_close_foreign_frame(fid_t cid)'

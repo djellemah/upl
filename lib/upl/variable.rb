@@ -1,5 +1,5 @@
 module Upl
-  # Really this is just an empty term.
+  # A variable, either from an existing term_t or a new one
   class Variable
     def initialize term_t = nil, name: nil
       @term_t = term_t || self.class.to_term
@@ -20,6 +20,16 @@ module Upl
 
       inst
     end
+
+    def unify value
+      warn "don't pass a term_t in here" if Fiddle::Pointer === value
+      case Upl::Extern::PL_unify term_t, value.to_term_t
+      when Upl::Extern::TRUE;  true
+      when Upl::Extern::FALSE; false
+      end
+    end
+
+    def === value; unify value end
 
     # bit of a hack to create empty variables for a functor
     def self.to_term

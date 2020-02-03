@@ -18,15 +18,12 @@ module Upl
 
     # call any method on any object, from prolog
     def self.register_mcall_predicate
-      Upl::Foreign.register_semidet :mcall do |obj_term_t,meth_term_t,v_term_t|
-        obj = Upl::Tree.of_term obj_term_t
-        meth = Upl::Tree.of_term meth_term_t
-        v = obj.send meth
-
-        Upl::Extern::PL_unify v_term_t, v.to_term_t
+      Upl::Foreign.register_semidet :mcall do |obj,meth,val|
+        val === obj.send(meth)
       end
     end
 
+    # mcall(+Object, +Method, -Result)
     register_mcall_predicate
 
     # lst_term is a Term, or a Fiddle::Pointer to term_t
@@ -87,17 +84,6 @@ module Upl
       # returns old fn ptr
       Upl::Extern.PL_agc_hook @atom_hook_fn
     end
-
-    def register_mcall_predicate
-      Upl::Foreign.register_semidet :mcall do |obj_term_t,meth_term_t,v_term_t|
-        obj = Upl::Tree.of_term obj_term_t
-        meth = Upl::Tree.of_term meth_term_t
-        v = obj.send meth
-
-        Upl::Extern::PL_unify v_term_t, v.to_term_t
-      end
-    end
-
   end
 end
 

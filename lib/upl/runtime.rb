@@ -17,6 +17,21 @@ module Upl
   module Runtime
     Ptr = Fiddle::Pointer
 
+    class PrologException < RuntimeError
+      def initialize(term_tree)
+        @term_tree = term_tree
+      end
+
+      def message
+        @message ||= begin
+          # TODO need to use print_message_lines/3 to generate this string
+          pp = PP.new
+          @term_tree.args.each{|arg| arg.pretty_print pp}
+          "#{@term_tree.atom}: #{pp.output}"
+        end
+      end
+    end
+
     def self.call st_or_term
       term =
       case st_or_term
@@ -94,6 +109,7 @@ module Upl
 
     # do a query for the given term and vars, as parsed by term_vars
     # qvars_hash is a hash of :VariableName => Term(PL_VARIABLE)
+    # TODO much duplication between this and .query below
     def self.term_vars_query qterm, qvars_hash
       raise "not a term" unless Term === qterm
       return enum_for __method__,  qterm, qvars_hash unless block_given?
@@ -105,21 +121,41 @@ module Upl
         args = TermVector.new qterm.arity do |idx| qterm[idx] end
 
         # module is NULL, flags is 0
-        query_id_p = Extern.PL_open_query Extern::NULL, 0, qterm.to_predicate, args.terms
+        query_id_p = Extern.PL_open_query \
+          Extern::NULL,
+          (flags=Extern::Flags::PL_Q_EXT_STATUS|Extern::Flags::PL_Q_CATCH_EXCEPTION), # report exceptions after next_solution
+          qterm.to_predicate,
+          args.terms
+
         query_id_p != 0 or raise 'no space on environment stack, see SWI-Prolog docs for PL_open_query'
 
         loop do
-          # TODO handle PL_Q_EXT_STATUS
-          res = Extern.PL_next_solution query_id_p
-          break if res == 0
+          case Extern.PL_next_solution query_id_p
+          when Extern::ExtStatus::FALSE
+            break
 
-          hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
-            # var will be invalidated by the next call to PL_next_solution,
-            # so we need to construct a ruby tree copy of the value term.
-            ha[name_sym] = var.to_ruby
+          when Extern::ExtStatus::EXCEPTION
+            tree = Tree.of_term Extern::PL_exception(query_id_p)
+
+            case tree.atom.to_ruby
+            when :ruby_error
+              # re-raise the actual exception object from the predicate
+              raise tree.args.first
+            else
+              raise PrologException, tree
+            end
+
+          # when Extern::ExtStatus::TRUE
+          # when Extern::ExtStatus::LAST
+          else
+            hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
+              # var will be invalidated by the next call to PL_next_solution,
+              # so we need to construct a ruby tree copy of the value term.
+              ha[name_sym] = var.to_ruby
+            end
+
+            yield hash
           end
-
-          yield hash
         end
 
       ensure
@@ -157,17 +193,34 @@ module Upl
       query_id_p&.to_i and Extern.PL_close_query query_id_p
     end
 
+    # TODO much duplication between this and .term_vars_query
+    # maybe this is not used anymore?
     def self.query term
       raise "not a Term" unless Term === term
       return enum_for :query, term unless block_given?
 
       answer_lst = TermVector.new term.arity do |idx| term[idx] end
-      query_id_p = Extern.PL_open_query Extern::NULL, 0, term.to_predicate, answer_lst.terms
+
+      query_id_p = Extern.PL_open_query \
+        Extern::NULL,
+        (flags=Extern::Flags::PL_Q_EXT_STATUS|Extern::Flags::PL_Q_CATCH_EXCEPTION), # report exceptions after next_solution
+        term.to_predicate,
+        answer_lst.terms
 
       loop do
-        rv = Extern.PL_next_solution query_id_p
-        break if rv == 0
-        yield answer_lst.each_t.map{|term_t| Tree.of_term term_t}
+        case Extern.PL_next_solution query_id_p
+        when Extern::ExtStatus::FALSE
+          break
+
+        when Extern::ExtStatus::EXCEPTION
+          raise PrologException, Extern::PL_exception(query_id_p)
+
+        # when Extern::ExtStatus::TRUE
+        # when Extern::ExtStatus::LAST
+        else
+          yield answer_lst.each_t.map{|term_t| Tree.of_term term_t}
+
+        end
       end
 
     ensure

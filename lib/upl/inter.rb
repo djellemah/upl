@@ -2,6 +2,7 @@ require_relative 'extern'
 require_relative 'foreign'
 
 module Upl
+  # Inter operation
   module Inter
     # Try Term, then Fiddle::Pointer, then to_term_t.
     # Return a term_t pointer

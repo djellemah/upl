@@ -1,4 +1,6 @@
 module Upl
+  # So Prolog terms are a rose tree. Who woulda thunkit?
+  #
   # Convert a term into a tree of ruby objects. This is necessary because
   # queries give back their results as terms which are invalidated as soon as
   # the next set of results is calculated. So we need to turn those terms into a

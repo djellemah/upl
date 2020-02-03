@@ -15,7 +15,8 @@ module Upl
     end
 
     def method_missing meth, *args
-      name = meth.to_s
+      # unfreeze
+      name = meth.to_s.dup
 
       the_method =
       if name.chomp! '='

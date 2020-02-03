@@ -1,7 +1,5 @@
 module Upl
-  # So Prolog terms are a rose tree. Who woulda thunkit?
-
-  # OK, so I guess this thing's job is interacting with term_t, whereas Tree's
+  # This thing's job is interacting with term_t, whereas Tree's
   # job is being a ruby copy of a term-tree.
   class Term
     def initialize term_or_string

@@ -3,6 +3,7 @@ require 'fiddle/import'
 require 'pathname'
 
 module Upl
+  # ffi bindings for swipl.so
   module Extern
     extend Fiddle::Importer
 

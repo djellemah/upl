@@ -67,5 +67,17 @@ RSpec.describe Upl do
         results.should == {:K=>:emulated_dialect, :V=>:swi}
       end
     end
+
+    describe 'query' do
+      it 'term only' do
+        en = Upl.query Upl::Term(:current_prolog_flag, Upl::Variable.new, Upl::Variable.new)
+        ary = en.to_a
+        # just choose one of the values here
+        ary.assoc(:toplevel_extra_white_line).should == [:toplevel_extra_white_line, true]
+      end
+
+      it 'term with variables'
+      it 'string'
+    end
   end
 end

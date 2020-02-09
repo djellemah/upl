@@ -77,7 +77,7 @@ module Upl
     end
 
     # once_only. Should probably be a singleton or something.
-    @inited ||= init
+    Thread::current[:upl] ||= init
 
     def self.predicate name, arity, module_name = nil
       Extern.PL_predicate Fiddle::Pointer[name.to_s], arity, NULL

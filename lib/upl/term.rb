@@ -33,7 +33,7 @@ module Upl
     # args are things that can be converted to term_t pointers using to_term_t method
     # TODO misnamed. functor means pred_name/n and this is actually
     # :pred_name, arg1, arg2...
-    def self.functor name, *args
+    def self.predicate name, *args
       # TODO maybe use a frame or something because this allocates quite a few sub-terms
       rv = Extern.PL_cons_functor_v \
         (term_t = Extern.PL_new_term_ref),

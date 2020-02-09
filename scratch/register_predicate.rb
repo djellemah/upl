@@ -1,5 +1,5 @@
 def doit
-  fact = Upl::Term.functor :person, :john, :anderson, Object.new
+  fact = Upl::Term :person, :john, :anderson, Object.new
   Upl.assertz fact
   vs = Array Upl.query 'person(A,B,C)'
   p vs

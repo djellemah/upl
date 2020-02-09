@@ -8,12 +8,12 @@ RSpec.describe Upl do
 
     before :each do
       # Doesn't work.
-      # tout_le_monde = Upl::Term.functor :person, *3.times.map{Upl::Variable.new.to_term}
-      # Upl::Runtime.call Upl::Term.functor :retractall, tout_le_monde
+      # tout_le_monde = Upl::Term :person, *3.times.map{Upl::Variable.new.to_term}
+      # Upl::Runtime.call Upl::Term :retractall, tout_le_monde
     end
 
     it 'retrieves an objective fact' do
-      fact = Upl::Term.functor :person, :john, :anderson, (obj = Object.new)
+      fact = Upl::Term :person, :john, :anderson, (obj = Object.new)
       Upl.assertz fact
 
       ry, = Array Upl.query 'person(A,B,C)'
@@ -25,10 +25,10 @@ RSpec.describe Upl do
     end
 
     it 'restricts based on objective value' do
-      fact1 = Upl::Term.functor :person, :james, :madison, (thing1 = Object.new)
+      fact1 = Upl::Term :person, :james, :madison, (thing1 = Object.new)
       Upl.assertz fact1
 
-      fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
+      fact2 = Upl::Term :person, :thomas, :paine, (thing2 = Object.new)
       Upl.assertz fact2
 
       # parse the query, then unify C with thing2

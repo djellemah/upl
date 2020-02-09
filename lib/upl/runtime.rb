@@ -196,7 +196,7 @@ module Upl
       return enum_for :squery, predicate_str, arity unless block_given?
 
       # bit of a hack because open_query wants to call to_predicate
-      # and we have to construct that manually here because Term.functor
+      # and we have to construct that manually here because Upl::Term
       # is slightly ill-suited.
       qterm = Object.new
       qterm.define_singleton_method :to_predicate do

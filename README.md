@@ -57,7 +57,7 @@ false.
 And in Upl:
 
 ``` ruby
-[1] pry(main)> fact = Upl::Term.functor :person, :john, :anderson
+[1] pry(main)> fact = Upl::Term :person, :john, :anderson
 => person/2(john,anderson)
 [2] pry(main)> Upl.assertz fact
 => true
@@ -75,7 +75,7 @@ Also, with objects other than symbols. Obviously, this is a rabbit-hole of
 Alician proportions. So, here we GOOOoooo...
 
 ``` ruby
-[1] pry(main)> fact = Upl::Term.functor :person, :john, :anderson, (o = Object.new)
+[1] pry(main)> fact = Upl::Term :person, :john, :anderson, (o = Object.new)
 => person/3(john,anderson,#<Object:0x0000563346a08e38 @_upl_atom=439429>)
 [2] pry(main)> Upl.assertz fact
 => true
@@ -93,10 +93,10 @@ much wisdom. Hurhur. And at least one extra instance variable.
 And now, the pièce de résistance - using an object as an input term:
 
 ``` ruby
-fact =  Upl::Term.functor :person, :james, :madison, (o = Object.new)
+fact =  Upl::Term :person, :james, :madison, (o = Object.new)
 Upl.assertz fact
 
-fact2 = Upl::Term.functor :person, :thomas, :paine, (thing2 = Object.new)
+fact2 = Upl::Term :person, :thomas, :paine, (thing2 = Object.new)
 Upl.assertz fact2
 
 # Note that both facts are in the result and the values for C are different

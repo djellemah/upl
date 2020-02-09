@@ -38,23 +38,6 @@ module Upl
     Runtime::call %Q{["#{p.realpath.to_s}"]}
   end
 
-  module_function def asserta term
-    Runtime.call Term.functor :asserta, term
-  end
-
-  module_function def assertz term
-    Runtime.call Term.functor :assertz, term
-  end
-
-  # behaves as if run under once, cos of the way call works
-  module_function def retract term
-    Runtime.call Term.functor :retract, term
-  end
-
-  def self.listing
-    (Upl.query 'with_output_to(string(Buffer),listing)').first[:Buffer]
-  end
-
   # Nicer syntax for Term.functor. Construct a Term from a symbol and args that
   # all respond to 'to_term_t'.
   #
@@ -62,11 +45,28 @@ module Upl
   #
   #   Upl.query 'current_prolog_flag(A,B)'
   #
-  # is moreorless the same as
+  # is similar to
   #
   #   Upl.query Term :current_prolog_flag, Variable.new, Variable.new
   #
   module_function def Term name, *args
-    Term.functor name, *args
+    Term.predicate name, *args
+  end
+
+  module_function def asserta term
+    Runtime.call Term :asserta, term
+  end
+
+  module_function def assertz term
+    Runtime.call Term :assertz, term
+  end
+
+  # behaves as if run under once, cos of the way call works
+  module_function def retract term
+    Runtime.call Term :retract, term
+  end
+
+  module_function def listing
+    (Upl.query 'with_output_to(string(Buffer),listing)').first[:Buffer]
   end
 end

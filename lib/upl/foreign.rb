@@ -42,7 +42,7 @@ module Upl
       rescue Exception => ex
         # pass the actual exception object through prolog
         # ultimately gets handled by Runtime.query and friends.
-        term = Upl::Term.functor :ruby_error, ex
+        term = Upl::Term :ruby_error, ex
         Extern::PL_raise_exception term.to_term_t
       end
 

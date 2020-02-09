@@ -28,18 +28,17 @@ module Upl
       term_t
     end
 
+    # returns a term
+    #
     # args are things that can be converted to term_t pointers using to_term_t method
+    # TODO misnamed. functor means pred_name/n and this is actually
+    # :pred_name, arg1, arg2...
     def self.functor name, *args
       # TODO maybe use a frame or something because this allocates quite a few sub-terms
-      functor_t = Extern.PL_new_functor name.to_sym.to_atom, args.size
-
-      arg_terms = Extern.PL_new_term_refs args.size
-      args.each_with_index do |arg,idx|
-        Extern::PL_unify (arg_terms+idx), arg.to_term_t
-      end
-
-      term_t = Extern.PL_new_term_ref
-      rv = Extern.PL_cons_functor_v term_t, functor_t, arg_terms
+      rv = Extern.PL_cons_functor_v \
+        (term_t = Extern.PL_new_term_ref),
+        Extern.PL_new_functor(name.to_sym.to_atom, args.size),
+        TermVector[*args].terms
       rv == 1 or raise "can't populate functor #{name}"
 
       new term_t

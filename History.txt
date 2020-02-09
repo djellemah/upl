@@ -1,3 +1,8 @@
+== 0.1.0
+* register ruby predicates with exception handling
+* Some DSL improvements
+* tightening api
+
 == 0.0.3
 * rectify README errors
 * specs to handle variable unification from variables from top-level queries.

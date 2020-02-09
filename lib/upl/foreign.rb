@@ -1,5 +1,8 @@
 module Upl
   # Register a foreign predicate in prolog
+  #
+  #  see https://www.swi-prolog.org/pldoc/man?section=modes
+  # for meanings of det, semidet, nondet
   module Foreign
     def self.predicates
       @predicates ||= Hash.new
@@ -38,6 +41,7 @@ module Upl
       # yes, really catch all exceptions because this is the language boundary
       rescue Exception => ex
         # pass the actual exception object through prolog
+        # ultimately gets handled by Runtime.query and friends.
         term = Upl::Term.functor :ruby_error, ex
         Extern::PL_raise_exception term.to_term_t
       end

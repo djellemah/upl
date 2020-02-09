@@ -135,6 +135,20 @@ module Upl
       query_id_p&.to_i and Extern.PL_close_query query_id_p
     end
 
+    def self.raise_prolog_or_ruby query_id_p
+      tree = Tree.of_term Extern::PL_exception(query_id_p)
+
+      case tree.atom.to_ruby
+      # special case for errors that originated inside a predicate
+      # that was defined in ruby.
+      when :ruby_error
+        # re-raise the actual exception object from the predicate
+        raise tree.args.first
+      else
+        raise PrologException, tree
+      end
+    end
+
     # do a query for the given term and vars, as parsed by term_vars
     # qvars_hash is a hash of :VariableName => Term(PL_VARIABLE)
     # and each variable is already bound in term.
@@ -153,15 +167,7 @@ module Upl
               break
 
             when Extern::ExtStatus::EXCEPTION
-              tree = Tree.of_term Extern::PL_exception(query_id_p)
-
-              case tree.atom.to_ruby
-              when :ruby_error
-                # re-raise the actual exception object from the predicate
-                raise tree.args.first
-              else
-                raise PrologException, tree
-              end
+              raise_prolog_or_ruby query_id_p
 
             # when Extern::ExtStatus::TRUE
             # when Extern::ExtStatus::LAST
@@ -223,7 +229,7 @@ module Upl
             break
 
           when Extern::ExtStatus::EXCEPTION
-            raise PrologException, Extern::PL_exception(query_id_p)
+            raise_prolog_or_ruby query_id_p
 
           # when Extern::ExtStatus::TRUE
           # when Extern::ExtStatus::LAST

@@ -45,12 +45,15 @@ module Upl
 
     def _string
       @_string ||= begin
-        Extern::PL_get_chars \
+        rv = Extern::PL_get_chars \
           term_t,
           (str_ref = Runtime::Ptr[0].ref),
-          Extern::Convert::CVT_VARIABLE | Extern::Convert::REP_UTF8 | Extern::Convert::BUF_MALLOC # | Extern::CVT_ALL
+          # need cvt_variable for normal variables, and cvt_write for clpfd variables
+          Extern::Convert::CVT_VARIABLE | Extern::Convert::CVT_WRITE | Extern::Convert::REP_UTF8 | Extern::Convert::BUF_MALLOC
+          # | Extern::CVT_ALL
 
         str_ref.ptr.free = Runtime.swipl_free_fn
+        # TODO might need to force utf8 encoding here?
         str_ref.ptr.to_s
       end
     end

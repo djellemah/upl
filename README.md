@@ -169,8 +169,6 @@ You cannot talk to swipl from a Thread other than ```Thread::main```. See https:
 
 I've used it to drive an address DCG on 50,000 addresses. Memory usage was stable.
 
-You cannot talk to swipl from a Thread other than ```Thread::main```
-
 ruby has a GC. swipl has a GC. At some point they will disagree. I haven't reached that point yet.
 
 UTF8-passthrough is not implemented, but there's a good chance you'll get what you want with the help of ```String#force_encoding('UTF-8')```.

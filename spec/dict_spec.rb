@@ -13,5 +13,20 @@ RSpec.describe Upl::Dict do
     dict.to_h.should == {name: :borogrove, value: 42, pi: 3.1415, e: 2.718281}
   end
 
-  it 'converts to dict term'
+  it 'converts hash to dict term' do
+    ha = {one: 1, duo: 2}
+    term, vars = Upl::Runtime.term_vars 'A = Dict'
+    vars[:Dict] = ha
+
+    rv = Upl.query(term, vars).first
+    rv[:A].should == ha
+  end
+
+  xit 'converts tagged hash to dict term' do
+    dict = Upl::Dict.new tag: :worley, values: {tre: 3, kvr: 4}
+    term, vars = Upl::Runtime.term_vars '_{tre: A} :< Dict'
+    vars[:Dict] = dict
+    ha = Upl.query(term,vars.first).first
+    ha[:A].should == 3
+  end
 end

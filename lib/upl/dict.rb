@@ -1,8 +1,9 @@
 module Upl
   class Dict < Hash
-    def initialize( tag, default_value = nil, &default_blk )
+    def initialize( tag: nil, values: nil, default_value: nil, &default_blk )
       @tag = tag
       super default_value, &default_blk
+      replace values if values
     end
 
     # fetch the tag for the dict
@@ -27,9 +28,7 @@ module Upl
     # copy dict_term_t into a ruby structure
     def self.of_term( dict_term_t )
       # Have to do a little hoop-jumping here. There are no c-level calls to
-      # access dicts, so we have to break them down with prolog predicates. But
-      # we can't process queries that have dicts in their results, otherwise we
-      # have an endless recursion.
+      # access dicts, so we have to break them down with prolog predicates.
 
       query_term, query_hash = Runtime.term_vars 'get_dict(K,Dict,V)'
 
@@ -42,7 +41,7 @@ module Upl
       en = Upl::Runtime.term_vars_query query_term, query_hash
 
       # map to a hash-y thing
-      en.each_with_object Dict.new(dict_tag dict_term_t) do |row,values|
+      en.each_with_object Dict.new(tag: dict_tag(dict_term_t)) do |row,values|
         values[row[:K]] = row[:V]
       end
     end

@@ -1,29 +1,35 @@
 # Upl
 
-A ruby wrapper for SWI-Prolog that goes both ways.
+Use SWI-Prolog from ruby.
 
-The main idea being that you want to just put in a chunk of prolog, and have the
-wrapper give you back your answers in terms of the variable names you specified.
-Just like what happens in your common-or-garden prolog REPL. But with pry's
-syntax colouring and pretty-printing :-)
+prolog statements can be specified as strings or as a ruby DSL.
 
-Also, do prolog-style queries on objects :-DD
+Define foreign predicates in ruby, so prolog can call back into ruby code.
+
+Assert facts containing ruby objects, so prolog can query ruby data by calling ruby methods.
 
 ## Tutorial
+
+The query api always returns an ```Enumerable``` of all values which satisfy the query.
 
 ### Queries
 
 Query a built-in predicate, with a full expression:
+
 ``` ruby
-[1] pry(main)> enum = Upl.query 'current_prolog_flag(K,V), member(K,[home,executable,shared_object_extension])'
+[1] pry(main)> enum = Upl.query <<~prolog
+  member(K,[home,executable,shared_object_extension]),
+  current_prolog_flag(K,V)
+prolog
 => #<Enumerator: ...>
 [2] pry(main) enum.to_a
-=> [{:K=>home, :V=>/usr/lib64/swipl-7.7.18},
- {:K=>executable, :V=>/usr/local/rvm/rubies/ruby-2.6.0-preview2/bin/ruby},
- {:K=>shared_object_extension, :V=>so}]
+=> [{:K=>:executable, :V=>:upl},
+    {:K=>:home, :V=>:"/usr/lib64/swipl"},
+    {:K=>:shared_object_extension, :V=>:so}]
 ```
 
 To read rules from a prolog file:
+
 ``` ruby
 [1] pry(main)> Upl.consult '/home/yours/funky_data.pl'
 => true
@@ -111,31 +117,75 @@ Array Upl::Runtime.term_vars_query query_term, query_vars
 => [{:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
 ```
 
-### Ruby Predicates
+### Ruby Methods
+You can call methods on ruby objects from prolog using the ```mcall(+Object, +Method, -Result)``` predicate:
 
-You can define predicates in ruby.
 ``` ruby
+def (obj = Object.new).voicemail
+  "Hey. For your logs."
+end
 
-
+query_term, query_vars = Upl::Runtime.term_vars "mcall(O,voicemail,St),string_codes(St,Co)"
+query_vars.O = obj
+Array Upl::Runtime.term_vars_query query_term, query_vars
+=> [{:O=>#<Object:0x00005610453b0528 @_upl_atom=495109>,
+  :St=>"Hey. For your logs.",
+  :Co=>[72, 101, 121, 46, 32, 70, 111, 114, 32, 121, 111, 117, 114, 32, 108, 111, 103, 115, 46]}]
 ```
 
-So you can (theoretically) define a query in prolog that searches a ruby object graph.
+### Ruby Predicates
 
-## Disclaimer
+You can define predicates in ruby:
 
-This is in-development code. I use it for some things other than just playing with. It might be useful for you too.
+``` ruby
+Upl::Foreign.register_semidet :special_concat do |arg0, arg1|
+  arg1 === "#{arg0}-special"
+end
+
+Array Upl.query 'special_concat(hello, A)'
+=> [{:A=>"hello-special"}]
+```
+
+Some notes:
+
+* ```===``` means unify
+
+* return value from the register_semidet block will be treated as a ruby
+  truthy/falsy value and converted to a prolog true/false, that is as
+  success/failure. So you have to be careful here because, for example, returning nil
+  would be interpreted by prolog to mean failure, and you will get no results. Or conversely: returning true for a series of unifications where only the last succeeded would lead to incorrect results.
+
+So you now you can define a query in prolog that searches a ruby object graph.
+
+## Limitations
+
+Although this is in-development code, I do use it for real work. For example, driving an address DCG on 50,000 addresses. Memory usage was stable.
+
+It might be useful for you too.
+
+### Specifically
+
+You cannot talk to swipl from a Thread other than ```Thread::main```. See https://www.swi-prolog.org/pldoc/man?section=foreignthread
+
+I've used it to drive an address DCG on 50,000 addresses. Memory usage was stable.
+
+You cannot talk to swipl from a Thread other than ```Thread::main```
 
 ruby has a GC. swipl has a GC. At some point they will disagree. I haven't reached that point yet.
+
+UTF8-passthrough is not implemented, but there's a good chance you'll get what you want with the help of ```String#force_encoding('UTF-8')```.
+
+There is not yet a way to register nondet predicates in ruby.
 
 ## Naming
 
 ```Upl```? Wat!? Why?
 
-Well. ```swipl``` was taken. ```ripl``` was taken. So maybe in keeping with long tradition: ```rupl```.
+Well. [```swipl```](https://github.com/meschbach/gem-swipl) was taken for the ```swipl``` gem which does some of what this does. ```ripl``` was taken. So maybe in keeping with long tradition: ```rupl```.
 
 But that leads to ```pry -I. -rrupl``` which is Not Fun.
 
-But ```upl``` gives you ```pry -I. -rupl``` So it's kinda like ```ubygems```.
+But ```upl``` gives you ```pry -I. -rupl``` So it's kinda like ```ubygems``` used to be.
 
 Also, ```Upl``` rhymes with tuple and/or supple. Depending on your pronunciation :-p
 

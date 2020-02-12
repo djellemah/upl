@@ -142,9 +142,16 @@ module Upl
 
     extern 'int PL_register_foreign_in_module(char *mod, char *name, int arity, foreign_t (*f)(), int flags, ...)'
 
+    # /usr/lib64/swipl/include/SWI-Prolog.h
     module Convert
-      REP_UTF8  = 0x1000
-      BUF_MALLOC = 0x0200
+      BUF_DISCARDABLE = 0x0000
+      BUF_RING =        0x0100
+      BUF_MALLOC =      0x0200
+      BUF_ALLOW_STACK = 0x0400
+
+      REP_ISO_LATIN_1 = 0x0000
+      REP_UTF8  =       0x1000
+      REP_MB =          0x2000
 
       CVT_ATOM =            0x0001
       CVT_STRING =          0x0002
@@ -219,6 +226,7 @@ module Upl
 
     extern 'int PL_put_atom(term_t t, atom_t a)'
     extern 'int PL_put_variable(term_t t)'
+    extern 'int PL_put_chars(term_t t, int flags, size_t len, const char *chars)'
     extern 'int PL_put_functor(term_t t, functor_t functor)'
     extern 'int PL_put_term(term_t t1, term_t t2)' # Make t1 point to the same term as t2.
     extern 'int PL_put_integer(term_t t, long i)'
@@ -231,8 +239,7 @@ module Upl
     extern 'int PL_unify_arg(int index, term_t t, term_t a)' # set index-th arg of t to a
 
     extern 'int PL_get_atom_chars(term_t t, char **a)'
-    # TODO deprecated, use something else
-    extern 'int PL_get_string(term_t t, char **s, size_t *len)'
+    extern 'int PL_get_nchars(term_t t, size_t *len, char **s, unsigned int flags)'
     extern 'int PL_get_integer(term_t t, int *i)'
     extern 'int PL_get_int64(term_t t, int64_t *i)'
     extern 'int PL_get_float(term_t t, double *f)'

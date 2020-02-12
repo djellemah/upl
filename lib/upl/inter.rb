@@ -153,8 +153,16 @@ end
 
 class String
   def to_term_t
-    rv = Upl::Extern.PL_put_string_nchars (term_t = Upl::Extern.PL_new_term_ref), length, Fiddle::Pointer[self]
+    rv = Upl::Extern.PL_put_chars \
+      (term_t = Upl::Extern.PL_new_term_ref),
+      (Upl::Extern::PL_STRING | Upl::Extern::Convert::REP_UTF8),
+      # swipl PL_chars_t struct uses number of octets | or number of wide chars.
+      # So use bytesize of string here.
+      bytesize,
+      Fiddle::Pointer[self]
+
     rv == 1 or raise "can't convert #{self} to term"
+
     term_t
   end
 end

@@ -18,14 +18,12 @@ RSpec.describe Upl::Foreign do
       rv[:A].should == "hello-special"
     end
 
-    # need to update Extern and Tree to use get_nchars instead of get_string
-    skip 'utf8 conversion' do
+    it 'utf8 conversion' do
       Upl::Foreign.register_semidet :sailing do |arg0|
         arg0 === "And the ʃip sailed ðere"
       end
 
       rv = Upl.query('sailing(X)').first
-      binding.pry
       rv[:X].should == "And the ʃip sailed ðere"
     end
 

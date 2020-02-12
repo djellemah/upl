@@ -53,9 +53,21 @@ module Upl
         bytes.unpack('D').first
 
       when Extern::PL_STRING
-        rv = Extern.PL_get_string term_t, (str_ptr = Fiddle::Pointer[0].ref), (len_ptr = Fiddle::Pointer[0].ref)
-        value_ptr = Fiddle::Pointer.new str_ptr.ptr, len_ptr.ptr.to_i
-        value_ptr.to_s[0,len_ptr.ptr.to_i]
+        # TODO could possibly get away with BUF_DISCARDABLE here?
+
+        flag_mod = Upl::Extern::Convert
+        rv = Extern.PL_get_nchars \
+          term_t,
+          # TODO what happens if len = 0; Fiddle::Pointer[len].ref is used?
+          (len_ptr = Fiddle::Pointer.malloc(Fiddle::SIZEOF_VOIDP, Upl::Runtime::ruby_free_fn)),
+          (str_ptr = Fiddle::Pointer.malloc(Fiddle::SIZEOF_VOIDP, Upl::Runtime::ruby_free_fn)),
+          flag_mod::CVT_STRING | flag_mod::BUF_MALLOC | flag_mod::REP_UTF8
+
+        # note that length here is number of octets, not number of utf8 chars
+        string = String.new (str_ptr.ptr.to_s len_ptr.ptr.to_i), encoding: Encoding::UTF_8
+        # free the malloc'd memory for the string
+        str_ptr.ptr.free = Upl::Runtime::swipl_free_fn
+        string
 
       when Extern::PL_NIL
         # TODO maybe this should be [] - see what happens when term_vars has no vars

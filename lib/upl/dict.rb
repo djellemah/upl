@@ -14,7 +14,7 @@ module Upl
       # eg, need to check that args.size == predicate.arity
       # otherwise segfaults and other weird stuff ensue
       rv = Extern::PL_call_predicate \
-        Extern::NULL, # module
+        Fiddle::NULL, # module
         0, # flags, see PL_open_query
         (Runtime.predicate 'is_dict', args.size),
         args.terms

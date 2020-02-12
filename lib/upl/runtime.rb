@@ -43,7 +43,7 @@ module Upl
         raise "dunno bout #{st_or_term}"
       end
 
-      rv = Extern.PL_call term.term_t, Extern::NULL
+      rv = Extern.PL_call term.term_t, Fiddle::NULL
       rv == 1 # don't raise
     end
 
@@ -103,7 +103,7 @@ module Upl
     # remember Atom can also be a string for swipl
     def self.term_vars st
       rv = Extern::PL_call_predicate \
-        Extern::NULL, # module
+        Fiddle::NULL, # module
         0, # flags, see PL_open_query
         (predicate 'atom_to_term', 3),
         # 3 variables, first one determined
@@ -124,7 +124,7 @@ module Upl
     def self.open_query qterm, args, mod: nil, flags: nil, &blk
       # This will need a string for the module, eventually
       # module is NULL, flags is 0
-      mod ||= Extern::NULL
+      mod ||= Fiddle::NULL
       flags ||= flags=Extern::Flags::PL_Q_EXT_STATUS | Extern::Flags::PL_Q_CATCH_EXCEPTION
 
       query_id_p = Extern.PL_open_query mod, flags, qterm.to_predicate, args.terms
@@ -186,7 +186,7 @@ module Upl
     end
 
     def self.predicate name, arity
-      pred_p = Extern.PL_predicate Ptr[name.to_s], arity, Extern::NULL
+      pred_p = Extern.PL_predicate Ptr[name.to_s], arity, Fiddle::NULL
     end
 
     # Simple query with predicate / arity
@@ -201,7 +201,7 @@ module Upl
       qterm = Object.new
       qterm.define_singleton_method :to_predicate do
         p_functor = Extern::PL_new_functor predicate_str.to_sym.to_atom, arity
-        Extern::PL_pred p_functor, Extern::NULL
+        Extern::PL_pred p_functor, Fiddle::NULL
       end
 
       args = TermVector.new arity

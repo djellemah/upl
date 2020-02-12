@@ -85,7 +85,7 @@ module Upl
     end
 
     def to_predicate
-      Extern::PL_pred to_functor, Extern::NULL
+      Extern::PL_pred to_functor, Fiddle::NULL
     end
 
     def tree; @tree || (Tree.of_term term_t) end

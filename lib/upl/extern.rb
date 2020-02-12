@@ -35,8 +35,6 @@ module Upl
 
     dlload so_path
 
-    NULL = Fiddle::Pointer.new 0
-
     typealias 'term_t', 'void *'
     typealias 'module_t', 'void *'
     typealias 'predicate_t', 'void *'

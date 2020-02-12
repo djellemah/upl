@@ -7,31 +7,30 @@ module Upl
   module Extern
     extend Fiddle::Importer
 
-    # use swipl config to find the .so file
-    def self.so_path
-      begin
-        swipl_exe = 'swipl'
-        values = `#{swipl_exe} --dump-runtime-variables=sh`.each_line.with_object Hash.new do |line,ha|
-          line.chomp!
-          # split by = and for rhs strip surrounding quotes and trailing ;
-          line =~ /^([^=]+)="([^"]*)";$/
-          ha[$1] = $2.strip
-        end
-      rescue Errno::ENOENT => ex
-        puts "#{swipl_exe} not found on path #{ENV['PATH']}"
-        exit 1
+    # fetch config values from swipl executable
+    def self.swipl_config_values
+      swipl_exe = 'swipl'
+      values = `#{swipl_exe} --dump-runtime-variables=sh`.each_line.with_object Hash.new do |line,ha|
+        # split by = and for rhs strip surrounding quotes and trailing ;
+        line =~ /^([^=]+)="([^"]*)";\s*$/
+        ha[$1] = $2.strip
       end
+    rescue Errno::ENOENT => ex
+      puts "#{swipl_exe} not found on path #{ENV['PATH']}"
+      exit 1
+    end
 
-      begin
-        # should result in something like
-        #   /usr/lib64/swipl-7.7.18/lib/x86_64-linux/libswipl.so
-        # which should actually exist
-        p = Pathname "#{values['PLBASE']}/lib/#{values['PLARCH']}/#{values['PLLIB'].gsub('-l', 'lib')}.#{values['PLSOEXT']}"
-        p.realpath.to_s
-      rescue Errno::ENOENT => ex
-        puts "problem with library #{p.to_s}: #{ex.message}"
-        exit 1
-      end
+    # use swipl config to find the .so file
+    # should result in something like
+    #   /usr/lib64/swipl-7.7.18/lib/x86_64-linux/libswipl.so
+    # which should actually exist
+    def self.so_path
+      values = swipl_config_values
+      p = Pathname "#{values['PLBASE']}/lib/#{values['PLARCH']}/#{values['PLLIB'].gsub('-l', 'lib')}.#{values['PLSOEXT']}"
+      p.realpath.to_s
+    rescue Errno::ENOENT => ex
+      puts "problem with library #{p.to_s}: #{ex.message}"
+      exit 1
     end
 
     dlload so_path

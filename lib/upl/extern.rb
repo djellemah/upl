@@ -35,6 +35,14 @@ module Upl
 
     dlload so_path
 
+    def self.ruby_free_fn
+      @ruby_free_fn ||= Fiddle::Function.new Fiddle::RUBY_FREE, [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
+    end
+
+    def self.swipl_free_fn
+      @swipl_free_fn ||= Fiddle::Function.new self['PL_free'], [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
+    end
+
     typealias 'term_t', 'void *'
     typealias 'module_t', 'void *'
     typealias 'predicate_t', 'void *'

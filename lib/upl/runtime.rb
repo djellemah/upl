@@ -47,14 +47,6 @@ module Upl
       rv == 1 # don't raise
     end
 
-    def self.ruby_free_fn
-      @ruby_free_fn ||= Fiddle::Function.new Fiddle::RUBY_FREE, [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
-    end
-
-    def self.swipl_free_fn
-      @swipl_free_fn ||= Fiddle::Function.new Extern['PL_free'], [Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOID
-    end
-
     def self.init
       # set up no output so we don't get swipl command line interfering in ruby
       # TODO exception handling should not kick off a prolog terminal
@@ -63,7 +55,7 @@ module Upl
 
       # convert args to char **
       ptr_size = Extern.sizeof 'char*'
-      arg_ptrs = Ptr.malloc ptr_size * args.size, ruby_free_fn
+      arg_ptrs = Ptr.malloc ptr_size * args.size, Extern::ruby_free_fn
       args.each_with_index do |rg,i|
         (arg_ptrs + i*ptr_size)[0,ptr_size] = Ptr[rg].ref
       end
@@ -80,7 +72,7 @@ module Upl
     Thread::current[:upl] ||= init
 
     def self.predicate name, arity, module_name = nil
-      Extern.PL_predicate Fiddle::Pointer[name.to_s], arity, NULL
+      Extern.PL_predicate Ptr[name.to_s], arity, NULL
     end
 
     def self.unify( term_a, term_b )

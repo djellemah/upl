@@ -45,10 +45,11 @@ module Upl
     end
 
     def populate
-      int_ptr = Runtime::Ptr[0].ref
-      atom_ptr = Runtime::Ptr[0].ref
+      rv = Extern::PL_get_name_arity \
+        term_t,
+        (atom_ptr = Fiddle::Pointer[0].ref),
+        (int_ptr = Fiddle::Pointer[0].ref)
 
-      rv = Extern::PL_get_name_arity term_t, atom_ptr, int_ptr
       # This happens when the term_t is not a PL_TERM (ie a compound)
       rv == 1 or raise "can't populate term"
 

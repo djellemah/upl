@@ -17,12 +17,12 @@ The query api always returns an ```Enumerable``` of all values which satisfy the
 Query a built-in predicate, with a full expression:
 
 ``` ruby
-[1] pry(main)> enum = Upl.query <<~prolog
+[1] pry(main)> q = Upl::Query.new <<~prolog
   member(K,[home,executable,shared_object_extension]),
   current_prolog_flag(K,V)
 prolog
-=> #<Enumerator: ...>
-[2] pry(main) enum.to_a
+=> #<Upl::Query...>
+[2] pry(main) q.to_a
 => [{:K=>:executable, :V=>:upl},
     {:K=>:home, :V=>:"/usr/lib64/swipl"},
     {:K=>:shared_object_extension, :V=>:so}]
@@ -79,12 +79,8 @@ Alician proportions. So, here we GOOOoooo...
 => person/3(john,anderson,#<Object:0x0000563346a08e38 @_upl_atom=439429>)
 [2] pry(main)> Upl.assertz fact
 => true
-[3] pry(main)> ha, = Array Upl.query 'person(A,B,C)'
-=> [{:A=>john,
-  :B=>anderson,
-  :C=>#<Object:0x0000563346a08e38 @_upl_atom=439429>}]
-[4] pry(main)> ha[:C].equal? o
-=> true
+[3] pry(main)> Upl::Query.new('person(A,B,C)').first[:C]
+=> #<Object:0x0000563346a08e38 @_upl_atom=439429>}]
 ```
 
 Woo. An object disappears into prolog, and comes back out again. Having gained
@@ -100,20 +96,20 @@ fact2 = Upl::Term :person, :thomas, :paine, (thing2 = Object.new)
 Upl.assertz fact2
 
 # Note that both facts are in the result and the values for C are different
-query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
-Array Upl::Runtime.term_vars_query query_term, query_vars
+q = Upl::Query.new 'person(A,B,C)'
+q.to_a
 =>[
  {:A=>james,  :B=>madison, :C=>#<Object:0x0000563f56e35580 @_upl_atom=439429>},
  {:A=>thomas, :B=>paine,   :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}
 ]
 
 # Unify C with thing2
-query_term, query_vars = Upl::Runtime.term_vars 'person(A,B,C)'
-query_vars.C = thing2
+q = Upl::Query.new 'person(A,B,C)'
+q.C = thing2
 
 # ... and we get the correct result
 # Note that the first fact is not in the result.
-Array Upl::Runtime.term_vars_query query_term, query_vars
+q.first
 => [{:A=>thomas, :B=>paine, :C=>#<Object:0x0000563f56d2b5b8 @_upl_atom=439813>}]
 ```
 
@@ -125,9 +121,9 @@ def (obj = Object.new).voicemail
   "Hey. For your logs."
 end
 
-query_term, query_vars = Upl::Runtime.term_vars "mcall(O,voicemail,St),string_codes(St,Co)"
-query_vars.O = obj
-Array Upl::Runtime.term_vars_query query_term, query_vars
+q = Upl::Query.new "mcall(O,voicemail,St),string_codes(St,Co)"
+q.O = obj
+q.to_a
 => [{:O=>#<Object:0x00005610453b0528 @_upl_atom=495109>,
   :St=>"Hey. For your logs.",
   :Co=>[72, 101, 121, 46, 32, 70, 111, 114, 32, 121, 111, 117, 114, 32, 108, 111, 103, 115, 46]}]
@@ -142,7 +138,7 @@ Upl::Foreign.register_semidet :special_concat do |arg0, arg1|
   arg1 === "#{arg0}-special"
 end
 
-Array Upl.query 'special_concat(hello, A)'
+Upl::Query.new('special_concat(hello, A)').to_a
 => [{:A=>"hello-special"}]
 ```
 

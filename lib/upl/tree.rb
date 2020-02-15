@@ -90,6 +90,12 @@ module Upl
 
     def arity; args.size end
 
+    def inspect
+      pp = PP.new
+      pretty_print pp
+      pp.output
+    end
+
     def pretty_print(pp)
       unless atom.to_sym == :','
         pp.text atom.to_s

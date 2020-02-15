@@ -283,8 +283,7 @@ module Upl
     # PL_EXPORT(int)  PL_put_term_from_chars(term_t t, int flags, size_t len, const char *s);
     # extern 'int PL_put_term_from_chars(term_t t, int flags, size_t len, const char *s)'
 
-    extern 'int PL_chars_to_term(const char *chars, term_t term)'
-    extern 'int PL_wchars_to_term(const pl_wchar_t *chars, term_t term)'
+    extern 'int PL_put_term_from_chars(term_t t, int flags, size_t len, const char *s)'
 
     extern 'void PL_unregister_atom(atom_t a)'
 

@@ -5,9 +5,20 @@ module Upl
     def initialize term_or_string
       case term_or_string
       when String
-        @term_t = Extern.PL_new_term_ref
-        rv = Extern.PL_chars_to_term Fiddle::Pointer[term_or_string], @term_t
-        rv == 1 or raise "failure parsing term #{term_or_string}"
+        # sadly, this doesn't keep variable names
+        rv = Extern.PL_put_term_from_chars \
+          (@term_t = Extern.PL_new_term_ref),
+          Extern::Convert::REP_UTF8,
+          term_or_string.bytesize,
+          Fiddle::Pointer[term_or_string]
+
+        case rv
+        when 1; true # all ok
+        when 0
+          raise "failure parsing term #{term_or_string}, #{Tree.of_term(@term_t).inspect}"
+        else
+          raise "unknown api return value #{rv}"
+        end
 
       when Fiddle::Pointer
         # assume this is a pointer to a term. Unsafe, but there's no choice really

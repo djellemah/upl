@@ -118,6 +118,10 @@ module Upl
     def first; self[0] end
     def last; self[arity-1] end
 
+    def deconstruct
+      map{|t| Term.new t}
+    end
+
     def [](idx)
       # remember args for terms are 1-based
       rv = Extern::PL_get_arg idx+1, term_t, (arg = Extern.PL_new_term_ref)

@@ -91,6 +91,12 @@ module Upl
 
     def arity; args.size end
 
+    # for 2.7 case ... in pattern matching
+    # for case term; in functor,arg1,arg; arg1
+    def deconstruct
+      [atom, *args]
+    end
+
     def inspect
       pp = PP.new
       pretty_print pp

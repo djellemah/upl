@@ -31,6 +31,7 @@ module Upl
 
     def === value; unify value end
 
+    # TODO remove
     # bit of a hack to create empty variables for a functor
     def self.to_term
       Extern.PL_new_term_ref

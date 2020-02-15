@@ -5,6 +5,7 @@ module Upl
   # queries give back their results as terms which are invalidated as soon as
   # the next set of results is calculated. So we need to turn those terms into a
   # ruby representation and keep them around.
+  # TODO rename to Ast
   class Tree
     # term is either a Term instance, or a Fiddle::Pointer to a term_t
     def initialize( term )

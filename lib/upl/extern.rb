@@ -232,8 +232,8 @@ module Upl
     extern 'int PL_is_number(term_t t)'
     extern 'int PL_is_acyclic(term_t t)'
 
-    extern 'int PL_put_atom(term_t t, atom_t a)'
     extern 'int PL_put_variable(term_t t)'
+    extern 'int PL_put_atom(term_t t, atom_t a)'
     extern 'int PL_put_chars(term_t t, int flags, size_t len, const char *chars)'
     extern 'int PL_put_functor(term_t t, functor_t functor)'
     extern 'int PL_put_term(term_t t1, term_t t2)' # Make t1 point to the same term as t2.

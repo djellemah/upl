@@ -15,6 +15,8 @@ require_relative 'upl/foreign'
 require_relative 'upl/query'
 
 module Upl
+  # todo need .call and .consult at this level?
+
   # an enumerator yielding hashes keyed by the variables, mapping to the term
   module_function def query string_or_term, vars = nil, &blk
     if string_or_term.is_a?(Term) && vars

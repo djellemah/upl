@@ -2,6 +2,7 @@ require 'fiddle'
 
 require_relative 'extern'
 
+# TODO move this to inter, or maybe a refinement
 class Fiddle::Pointer
   def term_type
     ::Upl::Extern.PL_term_type self
@@ -15,6 +16,7 @@ end
 
 module Upl
   module Runtime
+    # shortcuttery
     Ptr = Fiddle::Pointer
 
     class PrologException < RuntimeError
@@ -54,6 +56,7 @@ module Upl
       args = %w[upl --tty=false --signals=false --debug=false --quiet=true]
 
       # convert args to char **
+      # TODO Fiddle::SIZEOF_VOIDP would be faster
       ptr_size = Extern.sizeof 'char*'
       arg_ptrs = Ptr.malloc ptr_size * args.size, Extern::ruby_free_fn
       args.each_with_index do |rg,i|
@@ -69,10 +72,13 @@ module Upl
     end
 
     # once_only. Should probably be a singleton or something.
+    # TODO Nope, wrong. init is for the entire engine.
+    # PL_thread_attach_engine is for one-to-one threads,
+    # PL_create_engine is for engine pool
     Thread::current[:upl] ||= init
 
-    def self.predicate name, arity, module_name = nil
-      Extern.PL_predicate Ptr[name.to_s], arity, NULL
+    def self.predicate name, arity, module_name = 0
+      Extern.PL_predicate Ptr[name.to_s], arity, Fiddle::Pointer[module_name]
     end
 
     def self.unify( term_a, term_b )

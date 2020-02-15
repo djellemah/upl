@@ -138,6 +138,7 @@ protected
 end
 
 class Symbol
+  # TODO does this also need a to_term_t for atoms?
   def to_atom
     Upl::Extern.PL_new_atom to_s
   end

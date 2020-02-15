@@ -1,3 +1,7 @@
+== 0.2.0
+* add Upl::Query class for nicer api
+* faster term parsing
+
 == 0.1.0
 * register ruby predicates with exception handling
 * Some DSL improvements

@@ -12,6 +12,7 @@ require_relative 'upl/tree'
 require_relative 'upl/inter'
 require_relative 'upl/term_vector'
 require_relative 'upl/foreign'
+require_relative 'upl/query'
 
 module Upl
   # an enumerator yielding hashes keyed by the variables, mapping to the term

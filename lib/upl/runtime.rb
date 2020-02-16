@@ -72,10 +72,7 @@ module Upl
     end
 
     # once_only. Should probably be a singleton or something.
-    # TODO Nope, wrong. init is for the entire engine.
-    # PL_thread_attach_engine is for one-to-one threads,
-    # PL_create_engine is for engine pool
-    Thread::current[:upl] ||= init
+    @_upl_runtime ||= init
 
     def self.predicate name, arity, module_name = 0
       Extern.PL_predicate Ptr[name.to_s], arity, Fiddle::Pointer[module_name]

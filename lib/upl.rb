@@ -15,8 +15,7 @@ require_relative 'upl/foreign'
 require_relative 'upl/query'
 
 module Upl
-  # todo need .call and .consult at this level?
-
+  # You probably want to use Query.new instead of this.
   # an enumerator yielding hashes keyed by the variables, mapping to the term
   module_function def query string_or_term, vars = nil, &blk
     if string_or_term.is_a?(Term) && vars
@@ -34,6 +33,12 @@ module Upl
         raise "dunno about #{string_or_term.inspect}"
       end
     end
+  end
+
+  # For semidet predicates, ie that have only one result.
+  # You have to extract values using Upl::Variable#to_ruby.
+  module_function def call term
+    Runtime::call term
   end
 
   module_function def consult filename

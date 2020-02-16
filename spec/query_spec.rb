@@ -6,6 +6,24 @@ RSpec.describe Upl::Query do
   end
 
   it 'unification failure'
+  it 'unification failure' do
+    q = Upl::Query.new 'current_prolog_flag(K,V)'
+    q.K = :emulated_dialect
+    q.first.should == {:K=>:emulated_dialect, :V=>:swi}
+    ->{q.K = :something_else}.should raise_error(/unification/i)
+  end
+
+  it 'frames' do
+    q = Upl::Query.new 'current_prolog_flag(K,V)'
+
+    # rewind after frame
+    Upl::Runtime.with_frame do
+      q.K = :emulated_dialect
+      q.first.should == {:K=>:emulated_dialect, :V=>:swi}
+    end
+    q.K = :toplevel_mode
+    q.first.should == {:K=>:toplevel_mode, :V=>:backtracking}
+  end
 
   it 'single result' do
     q = Upl::Query.new 'current_prolog_flag(toplevel_mode,V)'

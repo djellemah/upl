@@ -91,7 +91,10 @@ module Upl
       fid_t = Extern.PL_open_foreign_frame
       yield fid_t
     ensure
-      fid_t and Extern.PL_close_foreign_frame fid_t
+      # discards term references, but keeps bindings
+      # fid_t and Extern.PL_close_foreign_frame fid_t
+      # same as close and also undo bindings
+      fid_t and Extern.PL_discard_foreign_frame fid_t
     end
 
     # Use prolog predicate to parse the string into a term (containing variables), along with its named

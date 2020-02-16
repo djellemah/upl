@@ -148,13 +148,26 @@ module Upl
       end
     end
 
-    # do a query for the given term and vars, as parsed by term_vars
+    # Do a query for the given term and vars, as parsed by term_vars.
     # qvars_hash is a hash of :VariableName => Term(PL_VARIABLE)
-    # and each variable is already bound in term.
+    # and each variable is already bound in qterm.
     # TODO much duplication between this and .query below
-    def self.term_vars_query qterm, qvars_hash
+    def self.query qterm, qvars_hash = nil
       raise "not a term" unless Term === qterm
       return enum_for __method__,  qterm, qvars_hash unless block_given?
+
+      result_map =
+      if qvars_hash
+        lambda do
+          # construct map of given variable names to their values
+          qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
+            ha[name_sym] = var.to_ruby
+          end
+        end
+      else
+        # no variable names provided so just get the values
+        ->{ qterm.map{|term_t| Tree.of_term term_t} }
+      end
 
       open_query qterm do |query_id_p|
         loop do
@@ -166,40 +179,12 @@ module Upl
             raise_prolog_or_ruby query_id_p
 
           when Extern::ExtStatus::TRUE, Extern::ExtStatus::LAST
-            hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
-              # var will be invalidated by the next call to PL_next_solution,
-              # so we need to construct a ruby tree copy of the value term immediately.
-              ha[name_sym] = var.to_ruby
-            end
-            yield hash
+            # var will be invalidated by the next call to PL_next_solution,
+            # so we need to construct a ruby tree copy of the value term immediately.
+            yield result_map[]
 
           else
             raise "unknown PL_next_solution status #{status}"
-          end
-        end
-      end
-    end
-
-    # TODO much duplication between this and .term_vars_query
-    # Only used by the term branch of Upl.query
-    def self.query term
-      raise "not a Term" unless Term === term
-      return enum_for :query, term unless block_given?
-
-      open_query term do |query_id_p|
-        loop do
-          case Extern.PL_next_solution query_id_p
-          when Extern::ExtStatus::FALSE
-            break
-
-          when Extern::ExtStatus::EXCEPTION
-            raise_prolog_or_ruby query_id_p
-
-          # when Extern::ExtStatus::TRUE
-          # when Extern::ExtStatus::LAST
-          else
-            yield term.map{|term_t| Tree.of_term term_t}
-
           end
         end
       end

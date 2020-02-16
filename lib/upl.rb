@@ -19,7 +19,7 @@ module Upl
   # an enumerator yielding hashes keyed by the variables, mapping to the term
   module_function def query string_or_term, vars = nil, &blk
     if string_or_term.is_a?(Term) && vars
-      Runtime.term_vars_query string_or_term, vars
+      Runtime.query string_or_term, vars
     else
       case string_or_term
       when Term
@@ -28,7 +28,7 @@ module Upl
         Runtime.query string_or_term
       when String
         term, vars = Runtime.term_vars string_or_term
-        Runtime.term_vars_query term, vars, &blk
+        Runtime.query term, vars, &blk
       else
         raise "dunno about #{string_or_term.inspect}"
       end

@@ -38,7 +38,7 @@ module Upl
       query_hash.delete :Dict
 
       # now we have a result set with K,V values
-      en = Upl::Runtime.term_vars_query query_term, query_hash
+      en = Upl::Runtime.query query_term, query_hash
 
       # map to a hash-y thing
       en.each_with_object Dict.new(tag: dict_tag(dict_term_t)) do |row,values|

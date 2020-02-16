@@ -40,7 +40,7 @@ module Upl
     end
 
     def call
-      @results ||= Upl::Runtime.term_vars_query @term, @vars
+      @results ||= Upl::Runtime.query @term, @vars
     end
 
     def each &blk

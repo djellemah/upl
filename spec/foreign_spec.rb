@@ -105,7 +105,7 @@ RSpec.describe Upl::Foreign do
         end
 
         query_vars.Obj = obj
-        rv = Array Upl::Runtime.term_vars_query query_term, query_vars
+        rv = Array Upl::Runtime.query query_term, query_vars
         rv.first[:Value].should == "Call yer logs, mate!"
       end
 
@@ -119,7 +119,7 @@ RSpec.describe Upl::Foreign do
         end
 
         query_vars.Obj = obj
-        rv = Array Upl::Runtime.term_vars_query query_term, query_vars
+        rv = Array Upl::Runtime.query query_term, query_vars
         rv.first[:Co].should == obj.voicemail.each_codepoint.to_a
       end
 
@@ -144,7 +144,7 @@ RSpec.describe Upl::Foreign do
 
         vars = Upl::Variables.new :Value
         term = Upl::Term :mcall, obj, :to_s, vars.Value
-        en = Upl::Runtime.term_vars_query term, vars
+        en = Upl::Runtime.query term, vars
         en.first[:Value].should == obj.to_s
       end
 
@@ -154,7 +154,7 @@ RSpec.describe Upl::Foreign do
 
         vars = Upl::Variables.new :value
         term = Upl::Term :mcall, obj, :to_s, vars.value
-        en = Upl::Runtime.term_vars_query term, vars
+        en = Upl::Runtime.query term, vars
          # TODO update api to have en.first.value
         en.first[:value].should == obj.to_s
       end

@@ -186,10 +186,6 @@ module Upl
       end
     end
 
-    def self.predicate name, arity
-      pred_p = Extern.PL_predicate Ptr[name.to_s], arity, Fiddle::NULL
-    end
-
     # Simple query with predicate / arity
     # Returns an array of arrays.
     # TODO remove, not really used

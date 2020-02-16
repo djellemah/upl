@@ -1,11 +1,4 @@
 describe Upl::Runtime do
-  describe 'squery' do
-    it 'returns values' do
-      ry = Array described_class.squery :current_prolog_flag, 2
-      ry.assoc(:emulated_dialect).should == [:emulated_dialect, :swi]
-    end
-  end
-
   describe 'variables' do
     it 'creates and unifies query variables' do
       query_term, query_vars = Upl::Runtime.term_vars 'current_prolog_flag(K,V)'

@@ -184,31 +184,6 @@ module Upl
       end
     end
 
-    # Simple query with predicate / arity
-    # Returns an array of arrays.
-    # TODO remove, not really used
-    def self.squery predicate_str, arity
-      return enum_for :squery, predicate_str, arity unless block_given?
-
-      # bit of a hack because open_query wants to call to_predicate
-      # and we have to construct that manually here because Upl::Term
-      # is slightly ill-suited.
-      qterm = Object.new
-      qterm.define_singleton_method :to_predicate do
-        p_functor = Extern::PL_new_functor predicate_str.to_sym.to_atom, arity
-        Extern::PL_pred p_functor, Fiddle::NULL
-      end
-
-      args = TermVector.new arity
-      open_query qterm, args do |query_id_p|
-        loop do
-          rv = Extern.PL_next_solution query_id_p
-          break if rv == 0
-          yield args.each_t.map{|term_t| Tree.of_term term_t}
-        end
-      end
-    end
-
     # TODO much duplication between this and .term_vars_query
     # Only used by the term branch of Upl.query
     def self.query term

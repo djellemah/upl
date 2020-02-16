@@ -158,29 +158,27 @@ module Upl
       raise "not a term" unless Term === qterm
       return enum_for __method__,  qterm, qvars_hash unless block_given?
 
-      with_frame do |fid_t|
-        # populate input values from qterm
-        args = TermVector.new qterm.arity do |idx| qterm[idx] end
-        open_query qterm, args do |query_id_p|
-          loop do
-            case Extern.PL_next_solution query_id_p
-            when Extern::ExtStatus::FALSE
-              break
+      # populate input values from qterm
+      args = TermVector.new qterm.arity do |idx| qterm[idx] end
+      open_query qterm, args do |query_id_p|
+        loop do
+          case Extern.PL_next_solution query_id_p
+          when Extern::ExtStatus::FALSE
+            break
 
-            when Extern::ExtStatus::EXCEPTION
-              raise_prolog_or_ruby query_id_p
+          when Extern::ExtStatus::EXCEPTION
+            raise_prolog_or_ruby query_id_p
 
-            # when Extern::ExtStatus::TRUE
-            # when Extern::ExtStatus::LAST
-            else
-              hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
-                # var will be invalidated by the next call to PL_next_solution,
-                # so we need to construct a ruby tree copy of the value term.
-                ha[name_sym] = var.to_ruby
-              end
-
-              yield hash
+          # when Extern::ExtStatus::TRUE
+          # when Extern::ExtStatus::LAST
+          else
+            hash = qvars_hash.each_with_object Hash.new do |(name_sym,var),ha|
+              # var will be invalidated by the next call to PL_next_solution,
+              # so we need to construct a ruby tree copy of the value term immediately.
+              ha[name_sym] = var.to_ruby
             end
+
+            yield hash
           end
         end
       end

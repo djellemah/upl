@@ -22,6 +22,8 @@ RSpec.describe Upl do
       ry[:C].should equal(obj)
 
       Upl.retract fact
+
+      Upl.query('person(A,B,C)').count.should == 0
     end
 
     it 'restricts based on objective value' do

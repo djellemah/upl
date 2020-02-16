@@ -25,7 +25,7 @@ RSpec.describe Upl::Term do
     term.last.to_ruby.atom.to_sym.should == :length
   end
 
-  it 'raises error' do
+  it 'raises prolog syntax error' do
     λ = lambda do
       # NOTE missing trailing )
       Upl::Term.new 'string_codes("Your great length is immaterial",B), length(B,L'

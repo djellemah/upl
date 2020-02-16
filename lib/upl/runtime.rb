@@ -119,11 +119,12 @@ module Upl
 
     # just to make sure the query handle pointer is properly closed
     # TODO should be private, because args are gnarly
-    def self.open_query qterm, args, mod: nil, flags: nil, &blk
+    def self.open_query qterm, mod: nil, flags: nil, &blk
       # This will need a string for the module, eventually
       # module is NULL, flags is 0
       mod ||= Fiddle::NULL
       flags ||= flags=Extern::Flags::PL_Q_EXT_STATUS | Extern::Flags::PL_Q_CATCH_EXCEPTION
+      args = TermVector.new qterm.arity do |idx| qterm[idx] end
 
       query_id_p = Extern.PL_open_query mod, flags, qterm.to_predicate, args.terms
       query_id_p != 0 or raise 'no space on environment stack, see SWI-Prolog docs for PL_open_query'
@@ -155,9 +156,7 @@ module Upl
       raise "not a term" unless Term === qterm
       return enum_for __method__,  qterm, qvars_hash unless block_given?
 
-      # populate input values from qterm
-      args = TermVector.new qterm.arity do |idx| qterm[idx] end
-      open_query qterm, args do |query_id_p|
+      open_query qterm do |query_id_p|
         loop do
           case (status = Extern.PL_next_solution query_id_p)
           when Extern::ExtStatus::FALSE
@@ -187,9 +186,7 @@ module Upl
       raise "not a Term" unless Term === term
       return enum_for :query, term unless block_given?
 
-      answer_lst = TermVector.new term.arity do |idx| term[idx] end
-
-      open_query term, answer_lst do |query_id_p|
+      open_query term do |query_id_p|
         loop do
           case Extern.PL_next_solution query_id_p
           when Extern::ExtStatus::FALSE
@@ -201,7 +198,7 @@ module Upl
           # when Extern::ExtStatus::TRUE
           # when Extern::ExtStatus::LAST
           else
-            yield answer_lst.each_t.map{|term_t| Tree.of_term term_t}
+            yield term.map{|term_t| Tree.of_term term_t}
 
           end
         end

@@ -1,3 +1,7 @@
+== 0.2.1
+* Query map_blk for transforms
+* frames for Query reuse
+
 == 0.2.0
 * add Upl::Query class for nicer api
 * faster term parsing

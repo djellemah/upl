@@ -6,9 +6,10 @@ module Upl
     # TODO can only be string at this point
     # One-use only. If you want a new query, create another instance.
     # Is an enumerable for the result set.
-    def initialize term_or_string
+    def initialize term_or_string, &map_blk
       @source = term_or_string
       @term, @vars = Upl::Runtime.term_vars term_or_string
+      @map_blk = map_blk
     end
 
     attr_reader :source, :term, :vars
@@ -43,7 +44,14 @@ module Upl
     end
 
     def each &blk
-      call.each &blk
+      call.map do |row|
+        # TODO this assume the if statement is faster than a call to a default ->i{i}
+        if @map_blk
+          blk.call @map_blk[row]
+        else
+          blk.call row
+        end
+      end
     end
 
     include Enumerable

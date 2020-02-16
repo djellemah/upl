@@ -5,7 +5,26 @@ RSpec.describe Upl::Query do
     q.first.should == {:K=>:emulated_dialect, :V=>:swi}
   end
 
-  it 'unification failure'
+  it 'map blk' do
+    q = Upl::Query.new 'current_prolog_flag(K,V)' do |ha|
+      {ha[:K] => ha[:V]}
+    end
+
+    q.K = :emulated_dialect
+
+    q.first.should == {:emulated_dialect => :swi}
+  end
+
+  it 'map blk with lowercase vars' do
+    q = Upl::Query.new 'current_prolog_flag(_k,_v)' do |_k:, _v:|
+      {_k => _v}
+    end
+
+    q._k = :emulated_dialect
+
+    q.first.should == {:emulated_dialect => :swi}
+  end
+
   it 'unification failure' do
     q = Upl::Query.new 'current_prolog_flag(K,V)'
     q.K = :emulated_dialect

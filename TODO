@@ -1,0 +1,28 @@
+## Soon-ish
+* register-nondet
+
+* threading
+  # PL_thread_attach_engine is for one-to-one threads,
+  # PL_create_engine is for engine pool
+
+* frames and rewind close vs discard vs rewind. Performance vs just recreating the query
+* frame docs
+* prolog streams to/from ruby strings
+  PL_put_chars can convert ruby string to prolog char list
+
+* look at ML type inference
+  Using unification from CS162 course, see lecture 9
+
+  Not sure what to do with it though. Could possibly apply to the ruby internal
+  AST (ie from the pattern matching examples) and see if that comes out with anything.
+
+* http routing with prolog
+
+## Medium term
+* handle bignums (using gmp / PL_get_mpz)
+* some kind of HashObjectArray xpath-style query engine, ie replacing poroq and distruct
+* be rigorous about swipl/ruby gc
+
+## Long term
+* object/term persistence (cos object ids won't always work)
+* allow for break to stop a prolog process. Signals? See rspec for special handling of ctrl-c

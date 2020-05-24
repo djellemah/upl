@@ -157,6 +157,23 @@ module Upl
 
     extern 'int PL_register_foreign_in_module(char *mod, char *name, int arity, foreign_t (*f)(), int flags, ...)'
 
+    # typealias 'foreign_t', 'void *'
+    typealias 'foreign_t', 'uintptr_t'
+    typealias 'control_t', 'void *'
+
+    extern 'foreign_t _PL_retry(intptr_t)'
+    extern 'foreign_t _PL_retry_address(void *)'
+    extern 'int PL_foreign_control(control_t)'
+    extern 'intptr_t PL_foreign_context(control_t)'
+    extern 'void * PL_foreign_context_address(control_t)'
+    extern 'predicate_t PL_foreign_context_predicate(control_t)'
+
+    module Nondet
+      PL_FIRST_CALL = (0)
+      PL_PRUNED =     (1)
+      PL_REDO =       (2)
+    end
+
     # /usr/lib64/swipl/include/SWI-Prolog.h
     module Convert
       BUF_DISCARDABLE =     0x00000000  # Store in single thread-local buffer

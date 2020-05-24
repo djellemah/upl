@@ -1,11 +1,10 @@
 module Upl
   # Mostly sugar
-  # TODO needs a row_proc like Sequel uses to generate the yielded values
   # TODO maybe cache @count (after first enumeration)
   class Query
     # TODO can only be string at this point
-    # One-use only. If you want a new query, create another instance.
-    # Is an enumerable for the result set.
+    # Is also an enumerable for the result set.
+    # map_blk, if provided, is called for each result before yielding
     def initialize term_or_string, &map_blk
       @source = term_or_string
       @term, @vars = Upl::Runtime.term_vars term_or_string
@@ -41,6 +40,12 @@ module Upl
 
     def call
       @results ||= Upl::Runtime.query @term, @vars
+    end
+
+    # Wrapper for Runtime.with_frame to control reuse/discard
+    # of query variables.
+    def with_frame &blk
+      Runtime.with_frame &blk
     end
 
     def each &blk

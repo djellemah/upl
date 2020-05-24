@@ -135,7 +135,10 @@ module Upl
     end
 
     def self.raise_prolog_or_ruby query_id_p
-      tree = Tree.of_term Extern::PL_exception(query_id_p)
+      exception_term_t = Extern::PL_exception(query_id_p)
+      tree = Tree.of_term exception_term_t
+      p clear_exception: tree
+      Extern.PL_clear_exception
 
       case tree.atom.to_ruby
       # special case for errors that originated inside a predicate

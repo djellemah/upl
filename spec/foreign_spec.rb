@@ -160,4 +160,110 @@ RSpec.describe Upl::Foreign do
       end
     end
   end
+
+  describe 'register_nondet' do
+    it 'output only' do
+      class SymbolIterator
+        def initialize
+          @en = ObjectSpace.each_object Symbol
+        end
+
+        def call arg0
+          arg0 === @en.next
+        end
+      end
+
+      Upl::Foreign.register_nondet(:symbol){SymbolIterator.new}
+
+      rv = Upl.query('symbol(Symbol)').to_a
+      # dunno why :!== causes trouble. Possibly use of :=== in ObjectIterator?
+      true_false = -> sym { [true, false, :true, :false, :'!=='].include? sym }
+      rv.map{ _1[:Symbol] }.reject(&true_false).sort.should == ObjectSpace.each_object(Symbol).reject(&true_false).sort
+    end
+
+    # This is why you have to be really careful doing relational
+    # things in a non-relational language...
+    # XD
+    describe 'two args' do
+      class Special
+        def initialize arg = nil
+          @arg = arg
+        end
+
+        def empty?; !@arg end
+      end
+
+      class ObjectIterator
+        def initialize
+          @en = ObjectSpace.each_object
+        end
+
+        def call arg0, arg1
+          raise "not determined" if Upl::Variable === arg0
+          while !(arg0 === (ne = @en.next)); end
+          raise "special oops" if Special === ne && !ne.empty?
+          arg1 === ne
+        end
+      end
+
+      Upl::Foreign.register_nondet(:class_object){ObjectIterator.new}
+
+      it 'single input' do
+        q = Upl::Query.new 'class_object(Class,Object)' do |row|
+          [row[:Class], row[:Object]]
+        end
+
+        q[:Class] = Range
+
+        grp = q.group_by{|(type,obj)| type}
+        grp.keys.should == [Range]
+        grp[Range].count.should > 1
+      end
+
+      it 'several inputs' do
+        q = Upl::Query.new 'member(Type, [Class1,Class2]),class_object(Type,Object)' do |row|
+          [row[:Type], row[:Object]]
+        end
+
+        q.Class1 === Range
+        q.Class2 === Symbol
+
+        grp = q.group_by{|(type,obj)| type}
+        grp.keys.should == [Range, Symbol]
+        grp[Range].count.should > 1
+        grp[Symbol].count.should > 1
+
+        # and just to check it does it again
+        q.to_a.count.should > 2
+      end
+    end
+
+    it 'several calls'
+
+    it 'fails to provoke cut on first' do
+      q = Upl::Query.new 'class_object(Class,Object)' do |row|
+        [row[:Class], row[:Object]]
+      end
+
+      q[:Class] === Special
+
+      specials = [Special.new(:not_empty)] + 10.times.map{Special.new}
+
+      binding.pry
+      q.to_a
+    end
+
+    it 'provoke cut on second or subsequent' do
+      q = Upl::Query.new 'class_object(Class,Object)' do |row|
+        [row[:Class], row[:Object]]
+      end
+
+      q[:Class] === Special
+
+      specials = 10.times.map{Special.new}
+      binding.pry
+      q.to_a
+    end
+
+  end
 end

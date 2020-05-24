@@ -1,3 +1,6 @@
+== 0.2.3
+* update C value for >=swi-prolog-8.1.29
+
 == 0.2.2
 * restrict to <=swi-prolog-8.1.22
 

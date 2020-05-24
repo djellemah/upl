@@ -29,6 +29,7 @@ module Upl
     def self.of_term( dict_term_t )
       # Have to do a little hoop-jumping here. There are no c-level calls to
       # access dicts, so we have to break them down with prolog predicates.
+      # TODO 24-May-2020 as of 8.1.20 or thereabouts, there are c-level calls.
 
       query_term, query_hash = Runtime.term_vars 'get_dict(K,Dict,V)'
 

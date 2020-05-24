@@ -53,6 +53,9 @@ module Upl
         bytes = double_ptr[0,8]
         bytes.unpack('D').first
 
+      when Extern::PL_RATIONAL
+        raise NotImplemented, 'convert to rational'
+
       when Extern::PL_STRING
         # TODO could possibly get away with BUF_DISCARDABLE here?
 

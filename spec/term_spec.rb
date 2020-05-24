@@ -38,4 +38,8 @@ RSpec.describe Upl::Term do
     term = Upl::Term.new 'atom(A) =.. List'
     term.atom.to_sym.should == :'=..'
   end
+
+  describe 'types' do
+    xit 'converts rational'
+  end
 end

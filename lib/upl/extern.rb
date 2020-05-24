@@ -35,9 +35,8 @@ module Upl
       exit 1
     end
 
-    if (version = swipl_config_values['PLVERSION']) >= '80100'
-      # 801xx seems to have changed some calls. Not sure yet what they are.
-      raise "unsupported version #{version}"
+    if (version = swipl_config_values['PLVERSION']) < '80129'
+      raise "unsupported version <#{version}"
     end
 
     dlload so_path
@@ -105,30 +104,31 @@ module Upl
     PL_VARIABLE =              (1)
     PL_ATOM =                  (2)
     PL_INTEGER =               (3)
-    PL_FLOAT =                 (4)
-    PL_STRING =                (5)
-    PL_TERM =                  (6)
-    PL_NIL =                   (7)
-    PL_BLOB =                  (8)
-    PL_LIST_PAIR =             (9)
-    PL_FUNCTOR =               (10)
-    PL_LIST =                  (11)
-    PL_CHARS =                 (12)
-    PL_POINTER =               (13)
-    PL_CODE_LIST =             (14)
-    PL_CHAR_LIST =             (15)
-    PL_BOOL =                  (16)
-    PL_FUNCTOR_CHARS =         (17)
-    _PL_PREDICATE_INDICATOR =  (18)
-    PL_SHORT =                 (19)
-    PL_INT =                   (20)
-    PL_LONG =                  (21)
-    PL_DOUBLE =                (22)
-    PL_NCHARS =                (23)
-    PL_UTF8_CHARS =            (24)
-    PL_UTF8_STRING =           (25)
-    PL_INT64 =                 (26)
-    PL_NUTF8_CHARS =           (27)
+    PL_RATIONAL =              (4)
+    PL_FLOAT =                 (5)
+    PL_STRING =                (6)
+    PL_TERM =                  (7)
+    PL_NIL =                   (8)
+    PL_BLOB =                  (9)
+    PL_LIST_PAIR =             (10)
+    PL_FUNCTOR =               (11)
+    PL_LIST =                  (12)
+    PL_CHARS =                 (13)
+    PL_POINTER =               (14)
+    PL_CODE_LIST =             (15)
+    PL_CHAR_LIST =             (16)
+    PL_BOOL =                  (17)
+    PL_FUNCTOR_CHARS =         (18)
+    PL_PREDICATE_INDICATOR =   (19)
+    PL_SHORT =                 (20)
+    PL_INT =                   (21)
+    PL_LONG =                  (22)
+    PL_DOUBLE =                (23)
+    PL_NCHARS =                (24)
+    PL_UTF8_CHARS =            (25)
+    PL_UTF8_STRING =           (26)
+    PL_INT64 =                 (27)
+    PL_NUTF8_CHARS =           (28)
     PL_NUTF8_CODES =           (29)
     PL_NUTF8_STRING =          (30)
     PL_NWCHARS =               (31)
@@ -159,27 +159,34 @@ module Upl
 
     # /usr/lib64/swipl/include/SWI-Prolog.h
     module Convert
-      BUF_DISCARDABLE = 0x0000
-      BUF_RING =        0x0100
-      BUF_MALLOC =      0x0200
-      BUF_ALLOW_STACK = 0x0400
+      BUF_DISCARDABLE =     0x00000000  # Store in single thread-local buffer
+      BUF_RING =            0x00010000  # Store in ring of 16 buffers
+      BUF_MALLOC =          0x00020000  # Store using PL_malloc()
+      BUF_ALLOW_STACK =     0x00040000  # Allow pointer into (global) stack
+      BUF_NORING =          0x00080000  # Do not store in ring
 
-      REP_ISO_LATIN_1 = 0x0000
-      REP_UTF8  =       0x1000
-      REP_MB =          0x2000
+      # output representation
+      REP_ISO_LATIN_1 =     0x00000000
+      REP_UTF8 =            0x00100000
+      REP_MB =              0x00200000
 
-      CVT_ATOM =            0x0001
-      CVT_STRING =          0x0002
-      CVT_LIST =            0x0004
-      CVT_INTEGER =         0x0008
-      CVT_FLOAT =           0x0010
-      CVT_VARIABLE =        0x0020
-      CVT_NUMBER =          CVT_INTEGER|CVT_FLOAT
-      CVT_ATOMIC =          CVT_NUMBER|CVT_ATOM|CVT_STRING
-      CVT_WRITE =           0x0040
-      CVT_WRITE_CANONICAL = 0x0080
-      CVT_WRITEQ =          0x00C0
-      CVT_ALL =             CVT_ATOMIC|CVT_LIST
+      CVT_ATOM =            0x00000001
+      CVT_STRING =          0x00000002
+      CVT_LIST =            0x00000004
+      CVT_INTEGER =         0x00000008
+      CVT_RATIONAL =        0x00000010
+      CVT_FLOAT =           0x00000020
+      CVT_VARIABLE =        0x00000040
+      CVT_NUMBER =          (CVT_RATIONAL|CVT_FLOAT)
+      CVT_ATOMIC =          (CVT_NUMBER|CVT_ATOM|CVT_STRING)
+      CVT_WRITE =           0x00000080
+      CVT_WRITE_CANONICAL = 0x00000080
+      CVT_WRITEQ =          0x000000C0
+      CVT_ALL =             (CVT_ATOMIC|CVT_LIST)
+      CVT_MASK =            0x00000fff
+
+      CVT_EXCEPTION =       0x00001000  # throw exception on error
+      CVT_VARNOFAIL =       0x00002000  # return 2 if argument is unbound
     end
 
     extern 'predicate_t PL_pred(functor_t f, module_t m)'

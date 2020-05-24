@@ -9,11 +9,13 @@ module Upl
 
     # fetch config values from swipl executable
     def self.swipl_config_values
-      swipl_exe = 'swipl'
-      values = `#{swipl_exe} --dump-runtime-variables=sh`.each_line.with_object Hash.new do |line,ha|
-        # split by = and for rhs strip surrounding quotes and trailing ;
-        line =~ /^([^=]+)="([^"]*)";\s*$/
-        ha[$1] = $2.strip
+      @swipl_config_value ||= begin
+        swipl_exe = 'swipl'
+        values = `#{swipl_exe} --dump-runtime-variables=sh`.each_line.with_object Hash.new do |line,ha|
+          # split by = and for rhs strip surrounding quotes and trailing ;
+          line =~ /^([^=]+)="([^"]*)";\s*$/
+          ha[$1] = $2.strip
+        end
       end
     rescue Errno::ENOENT => ex
       puts "#{swipl_exe} not found on path #{ENV['PATH']}"
@@ -31,6 +33,11 @@ module Upl
     rescue Errno::ENOENT => ex
       puts "problem with library #{p.to_s}: #{ex.message}"
       exit 1
+    end
+
+    if (version = swipl_config_values['PLVERSION']) >= '80100'
+      # 801xx seems to have changed some calls. Not sure yet what they are.
+      raise "unsupported version #{version}"
     end
 
     dlload so_path

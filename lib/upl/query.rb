@@ -47,7 +47,7 @@ module Upl
       call.map do |row|
         # TODO this assume the if statement is faster than a call to a default ->i{i}
         if @map_blk
-          blk.call @map_blk[row]
+          blk.call @map_blk[**row]
         else
           blk.call row
         end

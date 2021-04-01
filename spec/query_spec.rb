@@ -15,13 +15,25 @@ RSpec.describe Upl::Query do
     q.first.should == {:emulated_dialect => :swi}
   end
 
-  it 'map blk with lowercase vars' do
+  it 'map blk with lowercase vars to keyword params' do
     q = Upl::Query.new 'current_prolog_flag(_k,_v)' do |_k:, _v:|
       {_k => _v}
     end
 
     q._k = :emulated_dialect
 
+    q.first
+    q.first.should == {:emulated_dialect => :swi}
+  end
+
+  it 'map blk with lowercase vars to single hash' do
+    q = Upl::Query.new 'current_prolog_flag(_k,_v)' do |row|
+      {row[:_k] => row[:_v]}
+    end
+
+    q._k = :emulated_dialect
+
+    q.first
     q.first.should == {:emulated_dialect => :swi}
   end
 

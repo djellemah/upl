@@ -8,6 +8,12 @@ Define foreign predicates in ruby, so prolog can call back into ruby code.
 
 Assert facts containing ruby objects, so prolog can query ruby data by calling ruby methods.
 
+## versions
+
+Works on ruby-2.7, ruby-3.0 and ruby-3.1
+
+and up to swipl-8.5.3
+
 ## Tutorial
 
 The query api always returns an ```Enumerable``` of all values which satisfy the query.

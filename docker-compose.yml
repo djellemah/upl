@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  linux:
+    container_name: upl-linux
+    image: ubuntu:latest
+    command: sleep 14400

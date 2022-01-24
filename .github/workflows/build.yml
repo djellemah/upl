@@ -1,0 +1,84 @@
+name: rspecs
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [test-workflow]
+    tags: v*
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: ruby/setup-ruby@v1.84.0
+      with:
+        ruby-version: '3.0.2'
+        # 24-Jan-2022 not yet in ubuntu-latest
+        # ruby-version: '3.1.0'
+
+    - run: bundle install
+
+    # install from ppa for up-to-date version
+    - name: update ubuntu packages
+      run: |
+        sudo apt-get update
+
+        # otherwise it prompts for timezone
+        sudo apt-get install -y tzdata
+        sudo apt-get install -y software-properties-common
+
+    - name: install swi-prolog from ppa
+      run: |
+        # Stable versions
+        sudo apt-add-repository -y ppa:swi-prolog/stable
+        sudo apt-get update
+        sudo apt-get install -y swi-prolog-nox
+
+        # Development versions
+        # sudo apt-add-repository ppa:swi-prolog/devel
+        # sudo apt-get update
+        # sudo apt-get install -y swi-prolog-nox
+
+    - run: rspec
+
+  rspec-macos:
+    runs-on: macos-latest
+    continue-on-error: true
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: ruby/setup-ruby@v1.84.0
+      with:
+        ruby-version: '3.0.2'
+        # 24-Jan-2022 not yet in ubuntu-latest
+        # ruby-version: '3.1.0'
+
+    - run: bundle install
+
+    # TODO macos-specific stuff here
+    # https://www.swi-prolog.org/build/macos.html
+    # - name: update ubuntu
+    #   run: |
+    #     sudo apt-get update
+
+    #     # otherwise it prompts for timezone
+    #     sudo apt-get install -y tzdata
+    #     sudo apt-get install -y software-properties-common
+
+    # - name: install swi
+    #   run: |
+    #     # Stable versions
+    #     sudo apt-add-repository -y ppa:swi-prolog/stable
+    #     sudo apt-get update
+    #     sudo apt-get install -y swi-prolog-nox
+
+    #     # Development versions
+    #     # sudo apt-add-repository ppa:swi-prolog/devel
+    #     # sudo apt-get update
+    #     # sudo apt-get install -y swi-prolog-nox
+
+    - run: rspec

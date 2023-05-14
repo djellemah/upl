@@ -27,6 +27,7 @@ module Upl
     #   /usr/lib64/swipl-7.7.18/lib/x86_64-linux/libswipl.so
     # which should actually exist
     def self.so_path
+      return ENV['SWIPL_SO_PATH'] unless ENV['SWIPL_SO_PATH'].nil?
       values = swipl_config_values
       p = Pathname "#{values['PLBASE']}/lib/#{values['PLARCH']}/#{values['PLLIB'].gsub('-l', 'lib')}.#{values['PLSOEXT']}"
       p.realpath.to_s

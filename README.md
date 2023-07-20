@@ -12,9 +12,9 @@ Assert facts containing ruby objects, so prolog can query ruby data by calling r
 
 ## versions
 
-Works on ruby-2.7, ruby-3.0 and ruby-3.1
+Works on ruby-3.0, ruby-3.1, ruby-3.2
 
-and swipl-8.1.29 to swipl-8.5.3
+and swipl-8.1.29 to swipl-9.1.2
 
 ## Tutorial
 

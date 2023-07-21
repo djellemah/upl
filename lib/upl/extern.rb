@@ -26,14 +26,24 @@ module Upl
     # should result in something like
     #   /usr/lib64/swipl-7.7.18/lib/x86_64-linux/libswipl.so
     # which should actually exist
-    def self.so_path
-      return ENV['SWIPL_SO_PATH'] unless ENV['SWIPL_SO_PATH'].nil?
+    def self.calculate_so_path
       values = swipl_config_values
-      p = Pathname "#{values['PLBASE']}/lib/#{values['PLARCH']}/#{values['PLLIB'].gsub('-l', 'lib')}.#{values['PLSOEXT']}"
+      p = if easy_so = values['PLLIBSWIPL']
+        Pathname easy_so
+      else
+        # figure it out the hard way - this was prior to 8.1 or thereabouts
+        Pathname "#{values['PLBASE']}/lib/#{values['PLARCH']}/#{values['PLLIB'].gsub('-l', 'lib')}.#{values['PLSOEXT']}"
+      end
       p.realpath.to_s
     rescue Errno::ENOENT => ex
       puts "problem with library #{p.to_s}: #{ex.message}"
       exit 1
+    end
+
+    # where is the so/dylib
+    # overridable by env var SWIPL_SO_PATH
+    def self.so_path
+      ENV['SWIPL_SO_PATH'] || calculate_so_path
     end
 
     if (version = swipl_config_values['PLVERSION']) < '80129'

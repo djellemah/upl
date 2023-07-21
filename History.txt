@@ -1,3 +1,7 @@
+== 0.2.4
+* should now find the dylib on macos
+* run rspecs on multiple  ruby versions
+
 == 0.2.3
 * update C value for >=swi-prolog-8.1.29
 

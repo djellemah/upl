@@ -9,15 +9,17 @@ on:
 jobs:
   rspec:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # note 20-Jul-2023 2.7.8 is EOL
+        ruby_version: ['2.7.8', '3.0.6', '3.1.4', '3.2.2']
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: ruby/setup-ruby@v1.84.0
+    - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.0.2'
-        # 24-Jan-2022 not yet in ubuntu-latest
-        # ruby-version: '3.1.0'
+        ruby-version: ${{ matrix.ruby_version }}
 
     - run: bundle install
 
@@ -46,39 +48,30 @@ jobs:
 
   rspec-macos:
     runs-on: macos-latest
-    continue-on-error: true
+    strategy:
+      matrix:
+        # note 20-Jul-2023 2.7.8 is EOL
+        ruby_version: ['2.7.8', '3.0.6', '3.1.4', '3.2.2']
 
     steps:
-    - uses: actions/checkout@v2
+    - name: install swi-prolog
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        brew install swi-prolog
 
-    - uses: ruby/setup-ruby@v1.84.0
+        # for possible future debugging
+        # otool -L $(which swipl)
+        # swipl --dump-runtime-variables=sh
+        # env
+        # find /usr/local/Cellar/swi-prolog/9.0.4 -ls
+        # false
+
+    - uses: actions/checkout@v3
+
+    - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.0.2'
-        # 24-Jan-2022 not yet in ubuntu-latest
-        # ruby-version: '3.1.0'
+        ruby-version: ${{ matrix.ruby_version }}
 
     - run: bundle install
-
-    # TODO macos-specific stuff here
-    # https://www.swi-prolog.org/build/macos.html
-    # - name: update ubuntu
-    #   run: |
-    #     sudo apt-get update
-
-    #     # otherwise it prompts for timezone
-    #     sudo apt-get install -y tzdata
-    #     sudo apt-get install -y software-properties-common
-
-    # - name: install swi
-    #   run: |
-    #     # Stable versions
-    #     sudo apt-add-repository -y ppa:swi-prolog/stable
-    #     sudo apt-get update
-    #     sudo apt-get install -y swi-prolog-nox
-
-    #     # Development versions
-    #     # sudo apt-add-repository ppa:swi-prolog/devel
-    #     # sudo apt-get update
-    #     # sudo apt-get install -y swi-prolog-nox
 
     - run: rspec
